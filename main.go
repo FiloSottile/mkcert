@@ -81,7 +81,23 @@ func (m *mkcert) Run(args []string) {
 	}
 
 	if len(args) == 0 {
-		log.Println("Usage: TODO")
+		log.Printf(`
+Usage:
+
+	$ mkcert -install
+	Install the local CA in the system trust store.
+
+	$ mkcert example.org
+	Generate "example.org.pem" and "example.org-key.pem".
+
+	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
+	Generate "example.com+4.pem" and "example.com+4-key.pem".
+
+	$ mkcert -uninstall
+	Unnstall the local CA (but do not delete it).
+
+Change the CA certificate and key storage location by setting $CAROOT.
+`)
 		return
 	}
 
