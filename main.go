@@ -157,8 +157,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		filename += "+" + strconv.Itoa(len(hosts)-1)
 	}
 
-	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
-	fatalIfErr(err, "failed to encode certificate key")
+	privDER := x509.MarshalPKCS1PrivateKey(priv)
 	err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
 		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0644)
 	fatalIfErr(err, "failed to save certificate key")
@@ -201,7 +200,7 @@ func (m *mkcert) loadCA() {
 	if keyDERBlock == nil || keyDERBlock.Type != "PRIVATE KEY" {
 		log.Fatalln("ERROR: failed to read the CA key: unexpected content")
 	}
-	m.caKey, err = x509.ParsePKCS8PrivateKey(keyDERBlock.Bytes)
+	m.caKey, err = x509.ParsePKCS1PrivateKey(keyDERBlock.Bytes)
 	fatalIfErr(err, "failed to parse the CA key")
 }
 
@@ -230,8 +229,7 @@ func (m *mkcert) newCA() {
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, &pub, priv)
 	fatalIfErr(err, "failed to generate CA certificate")
 
-	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
-	fatalIfErr(err, "failed to encode CA key")
+	privDER := x509.MarshalPKCS1PrivateKey(priv)
 	err = ioutil.WriteFile(filepath.Join(m.CAROOT, keyName), pem.EncodeToMemory(
 		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0400)
 	fatalIfErr(err, "failed to save CA key")
