@@ -43,13 +43,17 @@ $ cd mkcert && make
 
 Windows will be supported soon.
 
-## Changing the location of the CA files
+## Advanced topics
 
-TODO
+### Changing the location of the CA files
 
-## Installing the CA on other computers
+The CA certificate and its key are stored in an application data folder in the user home. You usually don't have to worry about it, as installation is automated, but if you need it it's printed in the first line of the mkcert output.
 
-TODO
+If you want to manage separate CAs, you can use the environment variable `CAROOT` to set the folder where mkcert will place and look for the local CA files.
+
+### Installing the CA on other computers
+
+Installing in the trust store does not require the CA key, so you can export just the `rootCA.pem` file, point `CAROOT` to its directory on a different machine and run `-install`. Or, for example, commit just `rootCA.pem` and not its key to version control.
 
 Remember that mkcert is meant for development purposes, not production, so it should not be used on users' machines.
 

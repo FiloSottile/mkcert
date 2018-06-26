@@ -116,6 +116,10 @@ Change the CA certificate and key storage location by setting $CAROOT.
 }
 
 func (m *mkcert) makeCert(hosts []string) {
+	if m.caKey == nil {
+		log.Fatalln("ERROR: can't create new certificates because the CA key (rootCA-key.pem) is missing")
+	}
+
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	fatalIfErr(err, "failed to generate certificate key")
 
@@ -180,9 +184,6 @@ func (m *mkcert) loadCA() {
 
 	certPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read the CA certificate")
-	keyPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, keyName))
-	fatalIfErr(err, "failed to read the CA key")
-
 	certDERBlock, _ := pem.Decode(certPEMBlock)
 	if certDERBlock == nil || certDERBlock.Type != "CERTIFICATE" {
 		log.Fatalln("ERROR: failed to read the CA certificate: unexpected content")
@@ -190,6 +191,12 @@ func (m *mkcert) loadCA() {
 	m.caCert, err = x509.ParseCertificate(certDERBlock.Bytes)
 	fatalIfErr(err, "failed to parse the CA certificate")
 
+	if _, err := os.Stat(filepath.Join(m.CAROOT, keyName)); os.IsNotExist(err) {
+		return // keyless mode, where only -install works
+	}
+
+	keyPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, keyName))
+	fatalIfErr(err, "failed to read the CA key")
 	keyDERBlock, _ := pem.Decode(keyPEMBlock)
 	if keyDERBlock == nil || keyDERBlock.Type != "PRIVATE KEY" {
 		log.Fatalln("ERROR: failed to read the CA key: unexpected content")
@@ -230,7 +237,7 @@ func (m *mkcert) newCA() {
 	fatalIfErr(err, "failed to save CA key")
 
 	err = ioutil.WriteFile(filepath.Join(m.CAROOT, rootName), pem.EncodeToMemory(
-		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0400)
+		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 	fatalIfErr(err, "failed to save CA key")
 
 	log.Printf("Created a new local CA at \"%s\" 💥\n", m.CAROOT)
@@ -272,16 +279,6 @@ func (m *mkcert) install() {
 	m.installPlatform()
 	m.ignoreCheckFailure = true
 
-	/*
-		switch runtime.GOOS {
-		case "darwin":
-			m.installDarwin()
-		default:
-			log.Println("Installing is not available on your platform 👎")
-			log.Fatalf("If you know how, you can install the certificate at \"%s\" in your system trust store", filepath.Join(m.CAROOT, rootName))
-		}
-	*/
-
 	if m.check() { // useless, see comment on ignoreCheckFailure
 		log.Print("The local CA is now installed in the system trust store! ⚡️\n\n")
 	} else {
@@ -298,30 +295,6 @@ func (m *mkcert) check() bool {
 	if m.ignoreCheckFailure {
 		return true
 	}
-
-	/*
-		priv, err := rsa.GenerateKey(rand.Reader, 2048)
-		fatalIfErr(err, "failed to generate the test key")
-
-		tpl := &x509.Certificate{
-			SerialNumber: big.NewInt(42),
-			DNSNames:     []string{"test.mkcert.invalid"},
-
-			NotAfter:  time.Now().AddDate(0, 0, 1),
-			NotBefore: time.Now().AddDate(0, 0, -1),
-
-			KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-			ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-			BasicConstraintsValid: true,
-		}
-
-		pub := priv.PublicKey
-		cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
-		fatalIfErr(err, "failed to generate test certificate")
-
-		c, err := x509.ParseCertificate(cert)
-		fatalIfErr(err, "failed to parse test certificate")
-	*/
 
 	_, err := m.caCert.Verify(x509.VerifyOptions{})
 	return err == nil
