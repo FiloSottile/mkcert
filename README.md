@@ -31,7 +31,7 @@ mkcert automatically creates and installs a local CA in the system root store, a
 On macOS, use Homebrew.
 
 ```
-brew install --HEAD FiloSottile/mkcert/mkcert
+brew install --HEAD https://github.com/FiloSottile/mkcert/raw/master/HomebrewFormula/mkcert.rb
 ```
 
 On Linux (install support coming soon!), use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases), or build from source.
