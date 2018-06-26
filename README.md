@@ -34,7 +34,7 @@ On macOS, use Homebrew.
 brew install --HEAD FiloSottile/mkcert/mkcert
 ```
 
-On Linux, use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases), or build from source.
+On Linux (support coming soon!), use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases), or build from source.
 
 ```
 $ git clone https://github.com/FiloSottile/mkcert
