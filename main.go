@@ -16,18 +16,27 @@ import (
 	"io/ioutil"
 	"log"
 	"math/big"
+	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 )
 
-var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
-
 func main() {
 	log.SetFlags(0)
+	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
+	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	flag.Parse()
-	(&mkcert{}).Run()
+	if *installFlag && *uninstallFlag {
+		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
+	}
+	(&mkcert{
+		installMode: *installFlag, uninstallMode: *uninstallFlag,
+	}).Run(flag.Args())
 }
 
 const rootName = "rootCA.pem"
@@ -38,6 +47,8 @@ var rootSubject = pkix.Name{
 }
 
 type mkcert struct {
+	installMode, uninstallMode bool
+
 	CAROOT string
 	caCert *x509.Certificate
 	caKey  crypto.PrivateKey
@@ -48,19 +59,99 @@ type mkcert struct {
 	ignoreCheckFailure bool
 }
 
-func (m *mkcert) Run() {
+func (m *mkcert) Run(args []string) {
 	m.CAROOT = getCAROOT()
 	if m.CAROOT == "" {
 		log.Fatalln("ERROR: failed to find the default CA location, set one as the CAROOT env var")
 	}
 	fatalIfErr(os.MkdirAll(m.CAROOT, 0755), "failed to create the CAROOT")
 	m.loadCA()
-	if *installFlag {
+
+	if m.installMode {
 		m.install()
+		if len(args) == 0 {
+			return
+		}
+	} else if m.uninstallMode {
+		m.uninstall()
+		return
 	} else if !m.check() {
 		log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
 		log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
 	}
+
+	if len(args) == 0 {
+		log.Println("Usage: TODO")
+		return
+	}
+
+	re := regexp.MustCompile(`^[0-9A-Za-z._-]+$`)
+	for _, name := range args {
+		if ip := net.ParseIP(name); ip != nil {
+			continue
+		}
+		if re.MatchString(name) {
+			continue
+		}
+		log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
+	}
+
+	m.makeCert(args)
+}
+
+func (m *mkcert) makeCert(hosts []string) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	fatalIfErr(err, "failed to generate certificate key")
+
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	fatalIfErr(err, "failed to generate serial number")
+
+	tpl := &x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			Organization: []string{"mkcert development certificate"},
+		},
+
+		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotBefore: time.Now().AddDate(0, 0, -1),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+	for _, h := range hosts {
+		if ip := net.ParseIP(h); ip != nil {
+			tpl.IPAddresses = append(tpl.IPAddresses, ip)
+		} else {
+			tpl.DNSNames = append(tpl.DNSNames, h)
+		}
+	}
+
+	pub := priv.PublicKey
+	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
+	fatalIfErr(err, "failed to generate certificate")
+
+	filename := strings.Replace(hosts[0], ":", ".", -1)
+	if len(hosts) > 1 {
+		filename += "+" + strconv.Itoa(len(hosts)-1)
+	}
+
+	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
+	fatalIfErr(err, "failed to encode certificate key")
+	err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
+		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0644)
+	fatalIfErr(err, "failed to save certificate key")
+
+	err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
+		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0600)
+	fatalIfErr(err, "failed to save certificate key")
+
+	log.Printf("\nCreated a new certificate valid for the following names 📜")
+	for _, h := range hosts {
+		log.Printf(" - %q", h)
+	}
+	log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 }
 
 // loadCA will load or create the CA at CAROOT.
@@ -176,10 +267,15 @@ func (m *mkcert) install() {
 	*/
 
 	if m.check() { // useless, see comment on ignoreCheckFailure
-		log.Println("The local CA is now installed in the system trust store! ⚡️")
+		log.Print("The local CA is now installed in the system trust store! ⚡️\n\n")
 	} else {
-		log.Fatalln("Installing failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎")
+		log.Fatal("Installing failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎\n\n")
 	}
+}
+
+func (m *mkcert) uninstall() {
+	m.uninstallPlatform()
+	log.Print("The local CA is now uninstalled from the system trust store! 👋\n\n")
 }
 
 func (m *mkcert) check() bool {
