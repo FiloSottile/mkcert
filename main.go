@@ -152,7 +152,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
 
-	filename := strings.Replace(hosts[0], ":", ".", -1)
+	filename := strings.Replace(hosts[0], ":", "_", -1)
 	if len(hosts) > 1 {
 		filename += "+" + strconv.Itoa(len(hosts)-1)
 	}
