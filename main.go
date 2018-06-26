@@ -224,6 +224,8 @@ func (m *mkcert) newCA() {
 
 		BasicConstraintsValid: true,
 		IsCA: true,
+		MaxPathLen: 0,
+		MaxPathLenZero: true,
 	}
 
 	pub := priv.PublicKey
