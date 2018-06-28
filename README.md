@@ -37,7 +37,7 @@ brew install --HEAD https://github.com/FiloSottile/mkcert/raw/master/HomebrewFor
 brew install nss # if you use Firefox
 ```
 
-On Linux (`-install` support coming soon!), use [the pre-built binaries (again, coming soon)](https://github.com/FiloSottile/mkcert/releases), or build from source.
+On Linux (`-install` support coming soon!), use [the pre-built binaries (again, coming soon)](https://github.com/FiloSottile/mkcert/releases), or build from source (requires Go 1.10+).
 
 ```
 $ git clone https://github.com/FiloSottile/mkcert
