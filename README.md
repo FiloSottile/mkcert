@@ -7,17 +7,18 @@ $ mkcert -install
 Created a new local CA at "/Users/filippo/Library/Application Support/mkcert" 💥
 The local CA is now installed in the system trust store! ⚡️
 
-$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
+$ mkcert example.com '*.example.org' myapp.dev localhost 127.0.0.1 ::1
 Using the local CA at "/Users/filippo/Library/Application Support/mkcert" ✨
 
 Created a new certificate valid for the following names 📜
  - "example.com"
+ - "*.example.org"
  - "myapp.dev"
  - "localhost"
  - "127.0.0.1"
  - "::1"
 
-The certificate is at "./example.com+4.pem" and the key at "./example.com+4-key.pem" ✅
+The certificate is at "./example.com+5.pem" and the key at "./example.com+5-key.pem" ✅
 ```
 
 <p align="center"><img width="444" alt="Chrome screenshot" src="https://user-images.githubusercontent.com/1225294/41887838-7acd55ca-78d0-11e8-8a81-139a54faaf87.png"></p>

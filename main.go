@@ -93,6 +93,9 @@ Usage:
 	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
 	Generate "example.com+4.pem" and "example.com+4-key.pem".
 
+	$ mkcert '*.example.com'
+	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
+
 	$ mkcert -uninstall
 	Unnstall the local CA (but do not delete it).
 
@@ -101,12 +104,12 @@ Change the CA certificate and key storage location by setting $CAROOT.
 		return
 	}
 
-	re := regexp.MustCompile(`^[0-9A-Za-z._-]+$`)
+	hostnameRegexp := regexp.MustCompile(`(?i)^(\*\.)?[0-9a-z_-]([0-9a-z._-]*[0-9a-z_-])?$`)
 	for _, name := range args {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
 		}
-		if re.MatchString(name) {
+		if hostnameRegexp.MatchString(name) {
 			continue
 		}
 		log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
@@ -153,6 +156,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	fatalIfErr(err, "failed to generate certificate")
 
 	filename := strings.Replace(hosts[0], ":", "_", -1)
+	filename = strings.Replace(filename, "*", "_wildcard", -1)
 	if len(hosts) > 1 {
 		filename += "+" + strconv.Itoa(len(hosts)-1)
 	}
@@ -223,8 +227,7 @@ func (m *mkcert) newCA() {
 		KeyUsage: x509.KeyUsageCertSign,
 
 		BasicConstraintsValid: true,
-		IsCA: true,
-		MaxPathLen: 0,
+		IsCA:           true,
 		MaxPathLenZero: true,
 	}
 
