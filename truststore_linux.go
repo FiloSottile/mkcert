@@ -6,7 +6,14 @@ package main
 
 import (
 	"log"
+	"os"
 	"path/filepath"
+)
+
+var (
+	FirefoxPath         = "/usr/bin/firefox"
+	FirefoxProfile      = os.Getenv("HOME") + "/.mozilla/firefox/*"
+	CertutilInstallHelp = "apt install libnss3-tools"
 )
 
 func (m *mkcert) installPlatform() {

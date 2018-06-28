@@ -62,9 +62,19 @@ func (m *mkcert) Run(args []string) {
 	} else if m.uninstallMode {
 		m.uninstall()
 		return
-	} else if !m.check() {
-		log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
-		log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
+	} else {
+		var warning bool
+		if !m.checkPlatform() {
+			warning = true
+			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
+		}
+		if hasFirefox && !m.checkFirefox() {
+			warning = true
+			log.Println("Warning: the local CA is not installed in the Firefox trust store! ⚠️")
+		}
+		if warning {
+			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
+		}
 	}
 
 	if len(args) == 0 {
@@ -134,26 +144,45 @@ func getCAROOT() string {
 }
 
 func (m *mkcert) install() {
-	if m.check() {
-		return
+	var printed bool
+	if !m.checkPlatform() {
+		m.installPlatform()
+		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
+		log.Print("The local CA is now installed in the system trust store! ⚡️")
+		printed = true
 	}
-
-	m.installPlatform()
-	m.ignoreCheckFailure = true
-
-	if m.check() { // useless, see comment on ignoreCheckFailure
-		log.Print("The local CA is now installed in the system trust store! ⚡️\n\n")
-	} else {
-		log.Fatal("Installing failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎\n\n")
+	if hasFirefox && !m.checkFirefox() {
+		if hasCertutil {
+			m.installFirefox()
+			log.Print("The local CA is now installed in the Firefox trust store (requires restart)! 🦊")
+		} else {
+			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically installed in Firefox! ⚠️`)
+			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
+		}
+		printed = true
+	}
+	if printed {
+		log.Print("")
 	}
 }
 
 func (m *mkcert) uninstall() {
 	m.uninstallPlatform()
-	log.Print("The local CA is now uninstalled from the system trust store! 👋\n\n")
+	if hasFirefox {
+		if hasCertutil {
+			m.uninstallFirefox()
+		} else {
+			log.Print("")
+			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from Firefox (if it was ever installed)! ⚠️`)
+			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
+			log.Print("")
+		}
+	}
+	log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
+	log.Print("")
 }
 
-func (m *mkcert) check() bool {
+func (m *mkcert) checkPlatform() bool {
 	if m.ignoreCheckFailure {
 		return true
 	}
@@ -165,5 +194,11 @@ func (m *mkcert) check() bool {
 func fatalIfErr(err error, msg string) {
 	if err != nil {
 		log.Fatalf("ERROR: %s: %s", msg, err)
+	}
+}
+
+func fatalIfCmdErr(err error, cmd string, out []byte) {
+	if err != nil {
+		log.Fatalf("ERROR: failed to execute \"%s\": %s\n\n%s\n", cmd, err, out)
 	}
 }

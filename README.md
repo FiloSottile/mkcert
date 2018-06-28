@@ -33,16 +33,17 @@ On macOS, use Homebrew.
 
 ```
 brew install --HEAD https://github.com/FiloSottile/mkcert/raw/master/HomebrewFormula/mkcert.rb
+brew install nss # if you use Firefox
 ```
 
-On Linux (install support coming soon!), use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases), or build from source.
+On Linux (`-install` support coming soon!), use [the pre-built binaries (again, coming soon)](https://github.com/FiloSottile/mkcert/releases), or build from source.
 
 ```
 $ git clone https://github.com/FiloSottile/mkcert
 $ cd mkcert && make
 ```
 
-Windows will be supported soon.
+Windows will be supported next.
 
 ## Advanced topics
 

@@ -16,6 +16,12 @@ import (
 	"github.com/DHowett/go-plist"
 )
 
+var (
+	FirefoxPath         = "/Applications/Firefox.app"
+	FirefoxProfile      = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
+	CertutilInstallHelp = "brew install nss"
+)
+
 // https://github.com/golang/go/issues/24652#issuecomment-399826583
 var trustSettings []interface{}
 var _, _ = plist.Unmarshal(trustSettingsData, &trustSettings)
@@ -99,10 +105,4 @@ func (m *mkcert) uninstallPlatform() {
 	cmd := exec.Command("sudo", "security", "remove-trusted-cert", "-d", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security remove-trusted-cert", out)
-}
-
-func fatalIfCmdErr(err error, cmd string, out []byte) {
-	if err != nil {
-		log.Fatalf("ERROR: failed to execute \"%s\": %s\n\n%s\n", cmd, err, out)
-	}
 }
