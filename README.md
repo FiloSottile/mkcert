@@ -1,11 +1,12 @@
 # mkcert
 
-mkcert is a simple tool for making locally-trusted development certificates. There is no configuration.
+mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
 
 ```
 $ mkcert -install
 Created a new local CA at "/Users/filippo/Library/Application Support/mkcert" 💥
 The local CA is now installed in the system trust store! ⚡️
+The local CA is now installed in the Firefox trust store (requires restart)! 🦊
 
 $ mkcert example.com '*.example.org' myapp.dev localhost 127.0.0.1 ::1
 Using the local CA at "/Users/filippo/Library/Application Support/mkcert" ✨
@@ -55,9 +56,14 @@ If you want to manage separate CAs, you can use the environment variable `CAROOT
 
 ### Installing the CA on other computers
 
-Installing in the trust store does not require the CA key, so you can export just the `rootCA.pem` file, point `CAROOT` to its directory on a different machine and run `-install`. Or, for example, commit just `rootCA.pem` and not its key to version control.
+Installing in the trust store does not require the CA key, so you can export just the CA certificate and use mkcert to install it in other machines. For example, you can decide to commit just `rootCA.pem` and not its key to version control.
 
-Remember that mkcert is meant for development purposes, not production, so it should not be used on users' machines.
+* Look for the `rootCA.pem` file in `CAROOT` or in the default folder (see above)
+* copy it to a different machine
+* set `CAROOT` to its directory
+* run `mkcert -install`
+
+Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines.
 
 ---
 
