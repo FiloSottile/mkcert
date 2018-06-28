@@ -70,6 +70,10 @@ func (m *mkcert) Run(args []string) {
 			warning = true
 			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
 		}
+		if hasChrome && !m.checkChrome() {
+			warning = true
+			log.Println("Warning: the local CA is not installed in the Chrome/Chromium trust store! ⚠️")
+		}
 		if hasFirefox && !m.checkFirefox() {
 			warning = true
 			log.Println("Warning: the local CA is not installed in the Firefox trust store! ⚠️")
@@ -163,6 +167,16 @@ func (m *mkcert) install() {
 
 		printed = true
 	}
+	if hasChrome && !m.checkChrome() {
+		if hasCertutil {
+			m.installChrome()
+			log.Print("The local CA is now installed in the Chrome/Chromiumtrust store! 🦊")
+		} else {
+			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically installed in Chrome/Chromium! ⚠️`)
+			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
+		}
+		printed = true
+	}
 	if hasFirefox && !m.checkFirefox() {
 		if hasCertutil {
 			m.installFirefox()
@@ -182,10 +196,11 @@ func (m *mkcert) uninstall() {
 	m.uninstallPlatform()
 	if hasFirefox {
 		if hasCertutil {
+			m.uninstallChrome()
 			m.uninstallFirefox()
 		} else {
 			log.Print("")
-			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from Firefox (if it was ever installed)! ⚠️`)
+			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from Firefox and/or Chrome/Chromium (if it was ever installed)! ⚠️`)
 			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
 			log.Print("")
 		}

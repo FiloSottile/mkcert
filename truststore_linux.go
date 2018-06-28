@@ -14,7 +14,16 @@ var (
 	FirefoxPath         = "/usr/bin/firefox"
 	FirefoxProfile      = os.Getenv("HOME") + "/.mozilla/firefox/*"
 	CertutilInstallHelp = "apt install libnss3-tools"
+
+	hasChrome     bool
+	ChromiumPath  = "/usr/bin/chromium-browser"
+	ChromeProfile = filepath.Join(os.Getenv("HOME"), ".pki/nssdb")
 )
+
+func init() {
+	_, err := os.Stat(ChromiumPath)
+	hasChrome = !os.IsNotExist(err)
+}
 
 func (m *mkcert) installPlatform() {
 	log.Println("  -install is not yet fully supported on Linux  😣")
