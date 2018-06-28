@@ -32,3 +32,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/DHowett/go-plist"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"

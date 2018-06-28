@@ -15,6 +15,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+
+	"golang.org/x/net/idna"
 )
 
 func main() {
@@ -102,11 +104,16 @@ Change the CA certificate and key storage location by setting $CAROOT.
 	}
 
 	hostnameRegexp := regexp.MustCompile(`(?i)^(\*\.)?[0-9a-z_-]([0-9a-z._-]*[0-9a-z_-])?$`)
-	for _, name := range args {
+	for i, name := range args {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
 		}
-		if hostnameRegexp.MatchString(name) {
+		punycode, err := idna.ToASCII(name)
+		if err != nil {
+			log.Fatalf("ERROR: %q is not a valid hostname or IP: %s", name, err)
+		}
+		args[i] = punycode
+		if hostnameRegexp.MatchString(punycode) {
 			continue
 		}
 		log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
