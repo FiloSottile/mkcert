@@ -116,18 +116,16 @@ func (m *mkcert) newCA() {
 	priv, err := rsa.GenerateKey(rand.Reader, 3072)
 	fatalIfErr(err, "failed to generate the CA key")
 
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	fatalIfErr(err, "failed to generate serial number")
+	
 
 	tpl := &x509.Certificate{
-		SerialNumber: serialNumber,
-		Subject:      rootSubject,
+		
+		Subject:      certificate sign request
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
 		NotBefore: time.Now().AddDate(0, 0, -1),
 
-		KeyUsage: x509.KeyUsageCertSign,
+		KeyUsage: x509.KeyUsageCertSignRequest,
 
 		BasicConstraintsValid: true,
 		IsCA:           true,
