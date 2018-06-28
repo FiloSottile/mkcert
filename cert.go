@@ -67,7 +67,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
 	fatalIfErr(err, "failed to encode certificate key")
 	err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
-		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0400)
+		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
 	fatalIfErr(err, "failed to save certificate key")
 
 	err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
