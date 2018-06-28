@@ -77,7 +77,7 @@ func (m *mkcert) forEachFirefoxProfile(f func(profile string)) (found int) {
 	}
 	for _, profile := range profiles {
 		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); !os.IsNotExist(err) {
-			f(profile)
+			f("dbm:" + profile)
 			found++
 		}
 		if _, err := os.Stat(filepath.Join(profile, "cert9.db")); !os.IsNotExist(err) {
