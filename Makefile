@@ -1,7 +1,7 @@
 IMPORT_PATH := github.com/FiloSottile/mkcert
 
 .PHONY: mkcert
-covfefe: .GOPATH/.ok
+mkcert: .GOPATH/.ok
 	GOPATH="$(PWD)/.GOPATH" go install -v $(IMPORT_PATH)
 
 .PHONY: clean
