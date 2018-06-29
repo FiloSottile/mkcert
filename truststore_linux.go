@@ -17,7 +17,8 @@ var (
 )
 
 func (m *mkcert) installPlatform() {
-	log.Fatalf("-install is not yet supported on Linux 😣\nYou can manually install the root certificate at %q in the meantime.", filepath.Join(m.CAROOT, rootName))
+	log.Println("  -install is not yet fully supported on Linux  😣")
+	log.Printf("You can manually install the root certificate at %q in the meantime.", filepath.Join(m.CAROOT, rootName))
 }
 
 func (m *mkcert) uninstallPlatform() {}

@@ -154,8 +154,13 @@ func (m *mkcert) install() {
 	var printed bool
 	if !m.checkPlatform() {
 		m.installPlatform()
-		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
-		log.Print("The local CA is now installed in the system trust store! ⚡️")
+
+		// TODO: replace with a check for a successful install, drop OS check
+		m.ignoreCheckFailure = true
+		if runtime.GOOS != "linux" {
+			log.Print("The local CA is now installed in the system trust store! ⚡️")
+		}
+
 		printed = true
 	}
 	if hasFirefox && !m.checkFirefox() {
