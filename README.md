@@ -44,6 +44,11 @@ $ git clone https://github.com/FiloSottile/mkcert
 $ cd mkcert && make
 ```
 
+On ArchLinux use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert-git/):
+```
+yaourt -S mkcert-git
+```
+
 Windows will be supported next.
 
 ## Advanced topics
