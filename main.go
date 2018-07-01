@@ -23,12 +23,19 @@ func main() {
 	log.SetFlags(0)
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
+	var capathFlag = flag.Bool("capath", false, "print the path of the local rootCA.pem and rootCA-key.pem files")
 	flag.Parse()
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
+	if *installFlag && *capathFlag {
+		log.Fatalln("ERROR: you can't set -install and -capath at the same time")
+	}
+	if *uninstallFlag && *capathFlag {
+		log.Fatalln("ERROR: you can't set -uninstall and -capath at the same time")
+	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, capathMode: *capathFlag,
 	}).Run(flag.Args())
 }
 
@@ -36,7 +43,7 @@ const rootName = "rootCA.pem"
 const keyName = "rootCA-key.pem"
 
 type mkcert struct {
-	installMode, uninstallMode bool
+	installMode, uninstallMode, capathMode bool
 
 	CAROOT string
 	caCert *x509.Certificate
@@ -50,6 +57,10 @@ type mkcert struct {
 
 func (m *mkcert) Run(args []string) {
 	m.CAROOT = getCAROOT()
+	if m.capathMode {
+		log.Println(m.CAROOT)
+		return
+	}
 	if m.CAROOT == "" {
 		log.Fatalln("ERROR: failed to find the default CA location, set one as the CAROOT env var")
 	}
@@ -85,6 +96,9 @@ Usage:
 
 	$ mkcert -install
 	Install the local CA in the system trust store.
+	
+	$ mkcert -capath
+	Print the path of the rootCA.pem.
 
 	$ mkcert example.org
 	Generate "example.org.pem" and "example.org-key.pem".
