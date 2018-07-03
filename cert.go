@@ -12,6 +12,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -74,9 +75,13 @@ func (m *mkcert) makeCert(hosts []string) {
 		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 	fatalIfErr(err, "failed to save certificate key")
 
+	secondLvlWildcardRegexp := regexp.MustCompile(`(?i)^\*\.[0-9a-z_-]+$`)
 	log.Printf("\nCreated a new certificate valid for the following names 📜")
 	for _, h := range hosts {
 		log.Printf(" - %q", h)
+		if secondLvlWildcardRegexp.MatchString(h) {
+			log.Printf("   Warning: many browsers don't support second-level wildcards like %q ⚠️", h)
+		}
 	}
 	log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 }
