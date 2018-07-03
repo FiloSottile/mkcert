@@ -9,6 +9,7 @@ import (
 	"crypto"
 	"crypto/x509"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -23,7 +24,15 @@ func main() {
 	log.SetFlags(0)
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
+	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
 	flag.Parse()
+	if *carootFlag {
+		if *installFlag || *uninstallFlag {
+			log.Fatalln("ERROR: you can't set -[un]install and -CAROOT at the same time")
+		}
+		fmt.Println(getCAROOT())
+		return
+	}
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
@@ -96,9 +105,10 @@ Usage:
 	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
 
 	$ mkcert -uninstall
-	Unnstall the local CA (but do not delete it).
+	Uninstall the local CA (but do not delete it).
 
-Change the CA certificate and key storage location by setting $CAROOT.
+Change the CA certificate and key storage location by setting $CAROOT,
+print it with "mkcert -CAROOT".
 `)
 		return
 	}
