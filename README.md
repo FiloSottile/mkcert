@@ -44,7 +44,9 @@ go get -u github.com/FiloSottile/mkcert
 $(go env GOPATH)/bin/mkcert
 ```
 
-Windows will be supported next.
+Windows will be supported next. (PRs welcome!)
+
+Warning: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
 
 ## Advanced topics
 
@@ -54,16 +56,16 @@ The CA certificate and its key are stored in an application data folder in the u
 
 If you want to manage separate CAs, you can use the environment variable `CAROOT` to set the folder where mkcert will place and look for the local CA files.
 
-### Installing the CA on other computers
+### Installing the CA on other systems
 
-Installing in the trust store does not require the CA key, so you can export just the CA certificate and use mkcert to install it in other machines. For example, you can decide to commit just `rootCA.pem` and not its key to version control.
+Installing in the trust store does not require the CA key, so you can export just the CA certificate and use mkcert to install it in other machines.
 
 * Look for the `rootCA.pem` file in `CAROOT` or in the default folder (see above)
 * copy it to a different machine
 * set `CAROOT` to its directory
 * run `mkcert -install`
 
-Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines.
+Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
 
 ---
 
