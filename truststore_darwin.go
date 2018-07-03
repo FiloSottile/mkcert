@@ -72,7 +72,7 @@ func (m *mkcert) installPlatform() {
 	_, err = plist.Unmarshal(plistData, &plistRoot)
 	fatalIfErr(err, "failed to parse trust settings")
 
-	rootSubjectASN1, _ := asn1.Marshal(rootSubject.ToRDNSequence())
+	rootSubjectASN1, _ := asn1.Marshal(m.caCert.Subject.ToRDNSequence())
 
 	if plistRoot["trustVersion"].(uint64) != 1 {
 		log.Fatalln("ERROR: unsupported trust settings version:", plistRoot["trustVersion"])

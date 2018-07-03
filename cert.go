@@ -11,6 +11,8 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -18,8 +20,15 @@ import (
 	"time"
 )
 
-var rootSubject = pkix.Name{
-	Organization: []string{"mkcert development CA"},
+var userAndHostname string
+
+func init() {
+	u, _ := user.Current()
+	if u != nil {
+		userAndHostname = u.Username + "@"
+	}
+	out, _ := exec.Command("hostname").Output()
+	userAndHostname += strings.TrimSpace(string(out))
 }
 
 func (m *mkcert) makeCert(hosts []string) {
@@ -37,11 +46,12 @@ func (m *mkcert) makeCert(hosts []string) {
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"mkcert development certificate"},
+			Organization:       []string{"mkcert development certificate"},
+			OrganizationalUnit: []string{userAndHostname},
 		},
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now().AddDate(0, 0, -1),
+		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
@@ -127,10 +137,13 @@ func (m *mkcert) newCA() {
 
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
-		Subject:      rootSubject,
+		Subject: pkix.Name{
+			Organization:       []string{"mkcert development CA"},
+			OrganizationalUnit: []string{userAndHostname},
+		},
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now().AddDate(0, 0, -1),
+		NotBefore: time.Now(),
 
 		KeyUsage: x509.KeyUsageCertSign,
 
