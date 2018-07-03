@@ -58,7 +58,7 @@ If you want to manage separate CAs, you can use the environment variable `$CAROO
 
 ### Installing the CA on other systems
 
-Installing in the trust store does not require the CA key, so you can export only the CA certificate and use mkcert to install it in other machines.
+Installing in the trust store does not require the CA key, so you can export the CA certificate and use mkcert to install it in other machines.
 
 * Look for the `rootCA.pem` file in `mkcert -CAROOT`
 * copy it to a different machine
