@@ -113,10 +113,9 @@ Change the CA certificate and key storage location by setting $CAROOT.
 			log.Fatalf("ERROR: %q is not a valid hostname or IP: %s", name, err)
 		}
 		args[i] = punycode
-		if hostnameRegexp.MatchString(punycode) {
-			continue
+		if !hostnameRegexp.MatchString(punycode) {
+			log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
 		}
-		log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
 	}
 
 	m.makeCert(args)
