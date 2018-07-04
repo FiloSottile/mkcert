@@ -97,7 +97,7 @@ func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 		return
 	}
 	for _, profile := range profiles {
-		if stat, err := os.Stat(profile); err == nil && stat != nil && !stat.IsDir() {
+		if stat, err := os.Stat(profile); err != nil || !stat.IsDir() {
 			continue
 		}
 		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); !os.IsNotExist(err) {
