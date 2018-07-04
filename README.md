@@ -45,7 +45,7 @@ sudo apt install libnss3-tools
 sudo yum install nss-tools
 ```
 
-and build from source (requires Go 1.10+), or use [the pre-built binaries (coming soon)](https://github.com/FiloSottile/mkcert/releases).
+and build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ```
 go get -u github.com/FiloSottile/mkcert
