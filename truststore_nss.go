@@ -10,31 +10,42 @@ import (
 )
 
 var (
-	hasFirefox   bool
+	hasNSS       bool
 	hasCertutil  bool
 	certutilPath string
+	nssDB        = filepath.Join(os.Getenv("HOME"), ".pki/nssdb")
 )
 
 func init() {
 	_, err := os.Stat(FirefoxPath)
-	hasFirefox = !os.IsNotExist(err)
+	hasNSS = !os.IsNotExist(err)
 
-	out, err := exec.Command("brew", "--prefix", "nss").Output()
-	if err != nil {
-		return
+	switch runtime.GOOS {
+	case "darwin":
+		out, err := exec.Command("brew", "--prefix", "nss").Output()
+		if err != nil {
+			return
+		}
+		certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
+
+		_, err = os.Stat(certutilPath)
+		hasCertutil = !os.IsNotExist(err)
+
+	case "linux":
+		_, err := os.Stat(nssDB)
+		hasNSS = hasNSS && !os.IsNotExist(err)
+
+		certutilPath, err = exec.LookPath("certutil")
+		hasCertutil = err == nil
 	}
-	certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
-
-	_, err = os.Stat(certutilPath)
-	hasCertutil = !os.IsNotExist(err)
 }
 
-func (m *mkcert) checkFirefox() bool {
+func (m *mkcert) checkNSS() bool {
 	if !hasCertutil {
 		return false
 	}
 	success := true
-	if m.forEachFirefoxProfile(func(profile string) {
+	if m.forEachNSSProfile(func(profile string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			success = false
@@ -45,8 +56,8 @@ func (m *mkcert) checkFirefox() bool {
 	return success
 }
 
-func (m *mkcert) installFirefox() {
-	if m.forEachFirefoxProfile(func(profile string) {
+func (m *mkcert) installNSS() {
+	if m.forEachNSSProfile(func(profile string) {
 		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
 		out, err := cmd.CombinedOutput()
 		if err != nil {
@@ -57,16 +68,16 @@ func (m *mkcert) installFirefox() {
 		}
 		fatalIfCmdErr(err, "certutil -A", out)
 	}) == 0 {
-		log.Println("ERROR: no Firefox security databases found")
+		log.Printf("ERROR: no %s security databases found", NSSBrowsers)
 	}
-	if !m.checkFirefox() {
-		log.Println("Installing in Firefox failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎")
-		log.Println("Note that if you never started Firefox, you need to do that at least once.")
+	if !m.checkNSS() {
+		log.Printf("Installing in %s failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎", NSSBrowsers)
+		log.Printf("Note that if you never started %s, you need to do that at least once.", NSSBrowsers)
 	}
 }
 
-func (m *mkcert) uninstallFirefox() {
-	m.forEachFirefoxProfile(func(profile string) {
+func (m *mkcert) uninstallNSS() {
+	m.forEachNSSProfile(func(profile string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			return
@@ -77,8 +88,11 @@ func (m *mkcert) uninstallFirefox() {
 	})
 }
 
-func (m *mkcert) forEachFirefoxProfile(f func(profile string)) (found int) {
+func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 	profiles, _ := filepath.Glob(FirefoxProfile)
+	if _, err := os.Stat(nssDB); !os.IsNotExist(err) {
+		profiles = append(profiles, nssDB)
+	}
 	if len(profiles) == 0 {
 		return
 	}

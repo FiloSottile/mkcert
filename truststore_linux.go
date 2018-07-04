@@ -13,7 +13,8 @@ import (
 var (
 	FirefoxPath         = "/usr/bin/firefox"
 	FirefoxProfile      = os.Getenv("HOME") + "/.mozilla/firefox/*"
-	CertutilInstallHelp = "apt install libnss3-tools"
+	CertutilInstallHelp = `apt install libnss3-tools" or "yum install nss-tools`
+	NSSBrowsers         = "Firefox and/or Chrome/Chromium"
 )
 
 func (m *mkcert) installPlatform() {

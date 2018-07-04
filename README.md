@@ -37,7 +37,15 @@ brew install --HEAD https://github.com/FiloSottile/mkcert/raw/master/HomebrewFor
 brew install nss # if you use Firefox
 ```
 
-On Linux (`-install` support coming soon!), use [the pre-built binaries (again, coming soon)](https://github.com/FiloSottile/mkcert/releases), or build from source (requires Go 1.10+).
+On Linux, install `certutil`
+
+```
+sudo apt install libnss3-tools
+    -or-
+sudo yum install nss-tools
+```
+
+and build from source (requires Go 1.10+), or use [the pre-built binaries (coming soon)](https://github.com/FiloSottile/mkcert/releases).
 
 ```
 go get -u github.com/FiloSottile/mkcert

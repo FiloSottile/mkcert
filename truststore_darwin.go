@@ -20,6 +20,7 @@ var (
 	FirefoxPath         = "/Applications/Firefox.app"
 	FirefoxProfile      = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
 	CertutilInstallHelp = "brew install nss"
+	NSSBrowsers         = "Firefox"
 )
 
 // https://github.com/golang/go/issues/24652#issuecomment-399826583

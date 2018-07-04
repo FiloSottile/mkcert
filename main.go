@@ -79,9 +79,9 @@ func (m *mkcert) Run(args []string) {
 			warning = true
 			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
 		}
-		if hasFirefox && !m.checkFirefox() {
+		if hasNSS && !m.checkNSS() {
 			warning = true
-			log.Println("Warning: the local CA is not installed in the Firefox trust store! ⚠️")
+			log.Printf("Warning: the local CA is not installed in the %s trust store! ⚠️", NSSBrowsers)
 		}
 		if warning {
 			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
@@ -163,21 +163,20 @@ func (m *mkcert) install() {
 	var printed bool
 	if !m.checkPlatform() {
 		m.installPlatform()
+		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
 
-		// TODO: replace with a check for a successful install, drop OS check
-		m.ignoreCheckFailure = true
 		if runtime.GOOS != "linux" {
 			log.Print("The local CA is now installed in the system trust store! ⚡️")
 		}
 
 		printed = true
 	}
-	if hasFirefox && !m.checkFirefox() {
+	if hasNSS && !m.checkNSS() {
 		if hasCertutil {
-			m.installFirefox()
-			log.Print("The local CA is now installed in the Firefox trust store (requires restart)! 🦊")
+			m.installNSS()
+			log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
 		} else {
-			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically installed in Firefox! ⚠️`)
+			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
 			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
 		}
 		printed = true
@@ -189,12 +188,12 @@ func (m *mkcert) install() {
 
 func (m *mkcert) uninstall() {
 	m.uninstallPlatform()
-	if hasFirefox {
+	if hasNSS {
 		if hasCertutil {
-			m.uninstallFirefox()
+			m.uninstallNSS()
 		} else {
 			log.Print("")
-			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from Firefox (if it was ever installed)! ⚠️`)
+			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)! ⚠️`, NSSBrowsers)
 			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
 			log.Print("")
 		}
