@@ -54,7 +54,7 @@ $(go env GOPATH)/bin/mkcert
 
 Windows will be supported next. (PRs welcome!)
 
-Warning: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
 
 ## Advanced topics
 
