@@ -29,44 +29,62 @@ func init() {
 	if !os.IsNotExist(err) {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/mkcert-rootCA.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
-		return
+	} else {
+		_, err = os.Stat("/usr/local/share/ca-certificates/")
+		if !os.IsNotExist(err) {
+			SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
+			SystemTrustCommand = []string{"update-ca-certificates"}
+		}
 	}
-
-	_, err = os.Stat("/usr/local/share/ca-certificates/")
-	if !os.IsNotExist(err) {
-		SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
-		SystemTrustCommand = []string{"update-ca-certificates"}
+	if SystemTrustCommand != nil {
+		_, err := exec.LookPath(SystemTrustCommand[0])
+		if err != nil {
+			SystemTrustCommand = nil
+		}
 	}
 }
 
-func (m *mkcert) installPlatform() {
+func (m *mkcert) installPlatform() bool {
 	if SystemTrustCommand == nil {
-		log.Fatalf("-install is not yet supported on this Linux 😣\nYou can manually install the root certificate at %q in the meantime.", filepath.Join(m.CAROOT, rootName))
+		log.Printf("Installing to the system store is not yet supported on this Linux 😣 but %s will still work.", NSSBrowsers)
+		log.Printf("You can also manually install the root certificate at %q.", filepath.Join(m.CAROOT, rootName))
+		return false
 	}
 
 	cert, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read root certificate")
 
-	cmd := exec.Command("sudo", "tee", SystemTrustFilename)
+	cmd := CommandWithSudo("tee", SystemTrustFilename)
 	cmd.Stdin = bytes.NewReader(cert)
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "tee", out)
 
-	cmd = exec.Command("sudo", SystemTrustCommand...)
+	cmd = CommandWithSudo(SystemTrustCommand...)
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, strings.Join(SystemTrustCommand, " "), out)
+
+	return true
 }
 
-func (m *mkcert) uninstallPlatform() {
+func (m *mkcert) uninstallPlatform() bool {
 	if SystemTrustCommand == nil {
-		log.Fatal("-uninstall is not yet supported on this Linux 😣")
+		return false
 	}
 
-	cmd := exec.Command("sudo", "rm", SystemTrustFilename)
+	cmd := CommandWithSudo("rm", SystemTrustFilename)
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "rm", out)
 
-	cmd = exec.Command("sudo", SystemTrustCommand...)
+	cmd = CommandWithSudo(SystemTrustCommand...)
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, strings.Join(SystemTrustCommand, " "), out)
+
+	return true
+}
+
+func CommandWithSudo(cmd ...string) *exec.Cmd {
+	if _, err := exec.LookPath("sudo"); err != nil {
+		return exec.Command(cmd[0], cmd[1:]...)
+	}
+	return exec.Command("sudo", append([]string{"--"}, cmd...)...)
 }

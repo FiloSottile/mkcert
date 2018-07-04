@@ -51,7 +51,7 @@ var trustSettingsData = []byte(`
 </array>
 `)
 
-func (m *mkcert) installPlatform() {
+func (m *mkcert) installPlatform() bool {
 	cmd := exec.Command("sudo", "security", "add-trusted-cert", "-d", "-k", "/Library/Keychains/System.keychain", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security add-trusted-cert", out)
@@ -100,10 +100,14 @@ func (m *mkcert) installPlatform() {
 	cmd = exec.Command("sudo", "security", "trust-settings-import", "-d", plistFile.Name())
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-import", out)
+
+	return true
 }
 
-func (m *mkcert) uninstallPlatform() {
+func (m *mkcert) uninstallPlatform() bool {
 	cmd := exec.Command("sudo", "security", "remove-trusted-cert", "-d", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security remove-trusted-cert", out)
+
+	return true
 }

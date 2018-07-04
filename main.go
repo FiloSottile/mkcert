@@ -162,13 +162,10 @@ func getCAROOT() string {
 func (m *mkcert) install() {
 	var printed bool
 	if !m.checkPlatform() {
-		m.installPlatform()
-		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
-
-		if runtime.GOOS != "linux" {
+		if m.installPlatform() {
 			log.Print("The local CA is now installed in the system trust store! ⚡️")
 		}
-
+		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
 		printed = true
 	}
 	if hasNSS && !m.checkNSS() {
@@ -187,7 +184,6 @@ func (m *mkcert) install() {
 }
 
 func (m *mkcert) uninstall() {
-	m.uninstallPlatform()
 	if hasNSS {
 		if hasCertutil {
 			m.uninstallNSS()
@@ -198,8 +194,13 @@ func (m *mkcert) uninstall() {
 			log.Print("")
 		}
 	}
-	log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
-	log.Print("")
+	if m.uninstallPlatform() {
+		log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
+		log.Print("")
+	} else if hasCertutil {
+		log.Printf("The local CA is now uninstalled from the %s trust store(s)! 👋", NSSBrowsers)
+		log.Print("")
+	}
 }
 
 func (m *mkcert) checkPlatform() bool {
