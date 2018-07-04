@@ -50,6 +50,14 @@ Warning: the `rootCA-key.pem` file that mkcert automatically generates gives com
 
 ## Advanced topics
 
+### Mobile devices
+
+For the certificates to be trusted on mobile devices, you will have to install the root CA. It's the `rootCA.pem` file in the folder printed by `mkcert -CAROOT`.
+
+On iOS, you can either email the CA to yourself, or serve it from an HTTP server. After installing it, you must [enable full trust in it](https://support.apple.com/en-nz/HT204477).
+
+For Android, you will have to install the CA and then enable user roots in the development build of your app. See [this StackOverflow answer](https://stackoverflow.com/a/22040887/749014).
+
 ### Changing the location of the CA files
 
 The CA certificate and its key are stored in an application data folder in the user home. You usually don't have to worry about it, as installation is automated, but the location is printed by `mkcert -CAROOT`.
