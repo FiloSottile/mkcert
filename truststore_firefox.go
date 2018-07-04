@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -48,6 +49,12 @@ func (m *mkcert) installFirefox() {
 	if m.forEachFirefoxProfile(func(profile string) {
 		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
 		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("!!! You've hit a known issue. Please report the entire command output at https://github.com/FiloSottile/mkcert/issues/12\nProfile path: %s\nOS: %s/%s\ncertutil: %s\n", profile, runtime.GOOS, runtime.GOARCH, certutilPath)
+			cmd := exec.Command("ls", "-l", profile[4:])
+			cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
+			cmd.Run()
+		}
 		fatalIfCmdErr(err, "certutil -A", out)
 	}) == 0 {
 		log.Println("ERROR: no Firefox security databases found")
