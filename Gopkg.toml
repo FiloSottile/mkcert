@@ -36,3 +36,7 @@
 [[constraint]]
   branch = "master"
   name = "golang.org/x/net"
+
+[[constraint]]
+  name = "software.sslmate.com/src/go-pkcs12"
+  branch = "master"
