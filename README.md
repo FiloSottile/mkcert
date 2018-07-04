@@ -33,7 +33,7 @@ mkcert automatically creates and installs a local CA in the system root store, a
 On macOS, use Homebrew.
 
 ```
-brew install --HEAD https://github.com/FiloSottile/mkcert/raw/master/HomebrewFormula/mkcert.rb
+brew install mkcert
 brew install nss # if you use Firefox
 ```
 
