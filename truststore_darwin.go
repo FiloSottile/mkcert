@@ -17,8 +17,13 @@ import (
 )
 
 var (
-	FirefoxPath         = "/Applications/Firefox.app"
-	FirefoxProfile      = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
+	FirefoxPath    = "/Applications/Firefox.app"
+	FirefoxProfile = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
+
+	// Chrome on Darwin uses the Keychain
+	hasChrome = false
+	ChromeProfile string
+
 	CertutilInstallHelp = "brew install nss"
 )
 

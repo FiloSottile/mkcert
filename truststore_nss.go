@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"path/filepath"
 	"strings"
 )
@@ -18,22 +19,32 @@ func init() {
 	_, err := os.Stat(FirefoxPath)
 	hasFirefox = !os.IsNotExist(err)
 
-	out, err := exec.Command("brew", "--prefix", "nss").Output()
-	if err != nil {
-		return
+	switch runtime.GOOS {
+	case "darwin":
+		out, err := exec.Command("brew", "--prefix", "nss").Output()
+		if err != nil {
+			return
+		}
+		certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
+
+	case "linux":
+		certutilPath, err = exec.LookPath("certutil") // via libnss3-tools
+		if err == nil {
+			hasCertutil = true
+			return
+		}
 	}
-	certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
 
 	_, err = os.Stat(certutilPath)
 	hasCertutil = !os.IsNotExist(err)
 }
 
-func (m *mkcert) checkFirefox() bool {
+func (m *mkcert) checkNSS(path string) bool {
 	if !hasCertutil {
 		return false
 	}
 	success := true
-	if m.forEachFirefoxProfile(func(profile string) {
+	if m.forEachNSSProfile(path, func(profile string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			success = false
@@ -43,9 +54,15 @@ func (m *mkcert) checkFirefox() bool {
 	}
 	return success
 }
+func (m *mkcert) checkFirefox() bool {
+	return m.checkNSS(FirefoxProfile)
+}
+func (m *mkcert) checkChrome() bool {
+	return hasChrome && m.checkNSS(ChromeProfile)
+}
 
-func (m *mkcert) installFirefox() {
-	if m.forEachFirefoxProfile(func(profile string) {
+func (m *mkcert) installNSS(path string) {
+	if m.forEachNSSProfile(path, func(profile string) {
 		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
 		out, err := cmd.CombinedOutput()
 		fatalIfCmdErr(err, "certutil -A", out)
@@ -57,9 +74,17 @@ func (m *mkcert) installFirefox() {
 		log.Println("Note that if you never started Firefox, you need to do that at least once.")
 	}
 }
+func (m *mkcert) installFirefox() {
+	m.installNSS(FirefoxProfile)
+}
+func (m *mkcert) installChrome() {
+	if hasChrome {
+		m.installNSS(ChromeProfile)
+	}
+}
 
-func (m *mkcert) uninstallFirefox() {
-	m.forEachFirefoxProfile(func(profile string) {
+func (m *mkcert) uninstallNSS(path string) {
+	m.forEachNSSProfile(path, func(profile string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			return
@@ -69,9 +94,17 @@ func (m *mkcert) uninstallFirefox() {
 		fatalIfCmdErr(err, "certutil -D", out)
 	})
 }
+func (m *mkcert) uninstallFirefox() {
+	m.uninstallNSS(FirefoxProfile)
+}
+func (m *mkcert) uninstallChrome() {
+	if hasChrome {
+		m.uninstallNSS(ChromeProfile)
+	}
+}
 
-func (m *mkcert) forEachFirefoxProfile(f func(profile string)) (found int) {
-	profiles, _ := filepath.Glob(FirefoxProfile)
+func (m *mkcert) forEachNSSProfile(path string, f func(profile string)) (found int) {
+	profiles, _ := filepath.Glob(path)
 	if len(profiles) == 0 {
 		return
 	}
