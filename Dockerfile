@@ -18,4 +18,4 @@ COPY --from=buildImage /go/src/github.com/FiloSottile/mkcert/mkcert ./mkcert
 
 VOLUME /root/.local/share/mkcert
 
-ENTRYPOINT i[ "/mkcert" ]
+ENTRYPOINT [ "/mkcert" ]
