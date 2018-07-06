@@ -83,6 +83,10 @@ func (m *mkcert) Run(args []string) {
 			warning = true
 			log.Printf("Warning: the local CA is not installed in the %s trust store! ⚠️", NSSBrowsers)
 		}
+		if hasJava && !m.checkJava() {
+			warning = true
+			log.Println("Warning: the local CA is not installed in the Java trust store! ⚠️")
+		}
 		if warning {
 			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
 		}
@@ -178,6 +182,15 @@ func (m *mkcert) install() {
 		}
 		printed = true
 	}
+	if hasJava && !m.checkJava() {
+		if hasKeytool {
+			m.installJava()
+			log.Println("The local CA is now installed in Java's trust store ☕️")
+		} else {
+			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java! ⚠️`)
+		}
+		printed = true
+	}
 	if printed {
 		log.Print("")
 	}
@@ -191,6 +204,15 @@ func (m *mkcert) uninstall() {
 			log.Print("")
 			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)! ⚠️`, NSSBrowsers)
 			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
+			log.Print("")
+		}
+	}
+	if hasJava {
+		if hasKeytool {
+			m.uninstallJava()
+		} else {
+			log.Print("")
+			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically uninstalled from Java (if it was ever installed)! ⚠`)
 			log.Print("")
 		}
 	}
