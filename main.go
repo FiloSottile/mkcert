@@ -140,6 +140,8 @@ func getCAROOT() string {
 	switch runtime.GOOS {
 	case "windows":
 		dir = os.Getenv("LocalAppData")
+	case env = os.Getenv("XDG_DATA_HOME"); env != "":
+		dir = env
 	case "darwin":
 		dir = os.Getenv("HOME")
 		if dir == "" {
@@ -147,14 +149,11 @@ func getCAROOT() string {
 		}
 		dir = filepath.Join(dir, "Library", "Application Support")
 	default: // Unix
-		dir = os.Getenv("XDG_DATA_HOME")
+		dir = os.Getenv("HOME")
 		if dir == "" {
-			dir = os.Getenv("HOME")
-			if dir == "" {
-				return ""
-			}
-			dir = filepath.Join(dir, ".local", "share")
+			return ""
 		}
+		dir = filepath.Join(dir, ".local", "share")
 	}
 	return filepath.Join(dir, "mkcert")
 }
