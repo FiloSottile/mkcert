@@ -20,11 +20,33 @@ import (
 	"golang.org/x/net/idna"
 )
 
+const usage = `Usage of mkcert:
+
+	$ mkcert -install
+	Install the local CA in the system trust store.
+
+	$ mkcert example.org
+	Generate "example.org.pem" and "example.org-key.pem".
+
+	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
+	Generate "example.com+4.pem" and "example.com+4-key.pem".
+
+	$ mkcert '*.example.com'
+	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
+
+	$ mkcert -uninstall
+	Uninstall the local CA (but do not delete it).
+
+Change the CA certificate and key storage location by setting $CAROOT,
+print it with "mkcert -CAROOT".
+`
+
 func main() {
 	log.SetFlags(0)
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
+	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
 	flag.Parse()
 	if *carootFlag {
 		if *installFlag || *uninstallFlag {
@@ -89,27 +111,7 @@ func (m *mkcert) Run(args []string) {
 	}
 
 	if len(args) == 0 {
-		log.Printf(`
-Usage:
-
-	$ mkcert -install
-	Install the local CA in the system trust store.
-
-	$ mkcert example.org
-	Generate "example.org.pem" and "example.org-key.pem".
-
-	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
-	Generate "example.com+4.pem" and "example.com+4-key.pem".
-
-	$ mkcert '*.example.com'
-	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
-
-	$ mkcert -uninstall
-	Uninstall the local CA (but do not delete it).
-
-Change the CA certificate and key storage location by setting $CAROOT,
-print it with "mkcert -CAROOT".
-`)
+		log.Printf("\n%s", usage)
 		return
 	}
 
