@@ -137,12 +137,12 @@ func getCAROOT() string {
 	}
 
 	var dir string
-	switch runtime.GOOS {
-	case "windows":
+	switch {
+	case runtime.GOOS == "windows":
 		dir = os.Getenv("LocalAppData")
-	case env = os.Getenv("XDG_DATA_HOME"); env != "":
-		dir = env
-	case "darwin":
+	case os.Getenv("XDG_DATA_HOME") != "":
+		dir = os.Getenv("XDG_DATA_HOME")
+	case runtime.GOOS == "darwin":
 		dir = os.Getenv("HOME")
 		if dir == "" {
 			return ""
