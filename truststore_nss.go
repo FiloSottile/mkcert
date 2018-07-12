@@ -103,7 +103,7 @@ func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 		if _, err := os.Stat(filepath.Join(profile, "cert9.db")); !os.IsNotExist(err) {
 			f("sql:" + profile)
 			found++
-			continue // NSS 3.35+ doesn't support older cert*.db versions
+			continue
 		}
 		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); !os.IsNotExist(err) {
 			f("dbm:" + profile)
