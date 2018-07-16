@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -48,13 +49,13 @@ func (m *mkcert) installPlatform() bool {
 }
 
 func (m *mkcert) uninstallPlatform() bool {
-	// We'll just remove all certs with the org "mkcert development CA"
+	// We'll just remove all certs with the same serial number
 	// Open root store
 	store, err := openWindowsRootStore()
 	fatalIfErr(err, "open root store")
 	defer store.close()
 	// Do the deletion
-	deletedAny, err := store.deleteCertsFromOrg("mkcert development CA")
+	deletedAny, err := store.deleteCertsWithSerial(m.caCert.SerialNumber)
 	if err == nil && !deletedAny {
 		err = fmt.Errorf("No certs found")
 	}
@@ -96,7 +97,7 @@ func (w windowsRootStore) addCert(cert []byte) error {
 	return fmt.Errorf("Failed adding cert: %v", err)
 }
 
-func (w windowsRootStore) deleteCertsFromOrg(org string) (bool, error) {
+func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
 	// Go over each, deleting the ones we find
 	var cert *syscall.CertContext
 	deletedAny := false
@@ -113,7 +114,7 @@ func (w windowsRootStore) deleteCertsFromOrg(org string) (bool, error) {
 		certBytes := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length]
 		parsedCert, err := x509.ParseCertificate(certBytes)
 		// We'll just ignore parse failures for now
-		if err == nil && len(parsedCert.Subject.Organization) > 0 && parsedCert.Subject.Organization[0] == org {
+		if err == nil && parsedCert.SerialNumber != nil && parsedCert.SerialNumber.Cmp(serial) == 0 {
 			// Duplicate the context so it doesn't stop the enum when we delete it
 			dupCertPtr, _, err := procCertDuplicateCertificateContext.Call(uintptr(unsafe.Pointer(cert)))
 			if dupCertPtr == 0 {
