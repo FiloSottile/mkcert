@@ -9,6 +9,7 @@ import (
 	"crypto"
 	"crypto/x509"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -23,7 +24,15 @@ func main() {
 	log.SetFlags(0)
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
+	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
 	flag.Parse()
+	if *carootFlag {
+		if *installFlag || *uninstallFlag {
+			log.Fatalln("ERROR: you can't set -[un]install and -CAROOT at the same time")
+		}
+		fmt.Println(getCAROOT())
+		return
+	}
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
@@ -70,9 +79,9 @@ func (m *mkcert) Run(args []string) {
 			warning = true
 			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
 		}
-		if hasFirefox && !m.checkFirefox() {
+		if hasNSS && !m.checkNSS() {
 			warning = true
-			log.Println("Warning: the local CA is not installed in the Firefox trust store! ⚠️")
+			log.Printf("Warning: the local CA is not installed in the %s trust store! ⚠️", NSSBrowsers)
 		}
 		if warning {
 			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
@@ -96,9 +105,10 @@ Usage:
 	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
 
 	$ mkcert -uninstall
-	Unnstall the local CA (but do not delete it).
+	Uninstall the local CA (but do not delete it).
 
-Change the CA certificate and key storage location by setting $CAROOT.
+Change the CA certificate and key storage location by setting $CAROOT,
+print it with "mkcert -CAROOT".
 `)
 		return
 	}
@@ -113,10 +123,9 @@ Change the CA certificate and key storage location by setting $CAROOT.
 			log.Fatalf("ERROR: %q is not a valid hostname or IP: %s", name, err)
 		}
 		args[i] = punycode
-		if hostnameRegexp.MatchString(punycode) {
-			continue
+		if !hostnameRegexp.MatchString(punycode) {
+			log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
 		}
-		log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
 	}
 
 	m.makeCert(args)
@@ -128,24 +137,23 @@ func getCAROOT() string {
 	}
 
 	var dir string
-	switch runtime.GOOS {
-	case "windows":
+	switch {
+	case runtime.GOOS == "windows":
 		dir = os.Getenv("LocalAppData")
-	case "darwin":
+	case os.Getenv("XDG_DATA_HOME") != "":
+		dir = os.Getenv("XDG_DATA_HOME")
+	case runtime.GOOS == "darwin":
 		dir = os.Getenv("HOME")
 		if dir == "" {
 			return ""
 		}
 		dir = filepath.Join(dir, "Library", "Application Support")
 	default: // Unix
-		dir = os.Getenv("XDG_DATA_HOME")
+		dir = os.Getenv("HOME")
 		if dir == "" {
-			dir = os.Getenv("HOME")
-			if dir == "" {
-				return ""
-			}
-			dir = filepath.Join(dir, ".local", "share")
+			return ""
 		}
+		dir = filepath.Join(dir, ".local", "share")
 	}
 	return filepath.Join(dir, "mkcert")
 }
@@ -153,22 +161,18 @@ func getCAROOT() string {
 func (m *mkcert) install() {
 	var printed bool
 	if !m.checkPlatform() {
-		m.installPlatform()
-
-		// TODO: replace with a check for a successful install, drop OS check
-		m.ignoreCheckFailure = true
-		if runtime.GOOS != "linux" {
+		if m.installPlatform() {
 			log.Print("The local CA is now installed in the system trust store! ⚡️")
 		}
-
+		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
 		printed = true
 	}
-	if hasFirefox && !m.checkFirefox() {
+	if hasNSS && !m.checkNSS() {
 		if hasCertutil {
-			m.installFirefox()
-			log.Print("The local CA is now installed in the Firefox trust store (requires restart)! 🦊")
+			m.installNSS()
+			log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
 		} else {
-			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically installed in Firefox! ⚠️`)
+			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
 			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
 		}
 		printed = true
@@ -179,19 +183,23 @@ func (m *mkcert) install() {
 }
 
 func (m *mkcert) uninstall() {
-	m.uninstallPlatform()
-	if hasFirefox {
+	if hasNSS {
 		if hasCertutil {
-			m.uninstallFirefox()
+			m.uninstallNSS()
 		} else {
 			log.Print("")
-			log.Println(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from Firefox (if it was ever installed)! ⚠️`)
+			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)! ⚠️`, NSSBrowsers)
 			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
 			log.Print("")
 		}
 	}
-	log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
-	log.Print("")
+	if m.uninstallPlatform() {
+		log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
+		log.Print("")
+	} else if hasCertutil {
+		log.Printf("The local CA is now uninstalled from the %s trust store(s)! 👋", NSSBrowsers)
+		log.Print("")
+	}
 }
 
 func (m *mkcert) checkPlatform() bool {

@@ -1,3 +1,7 @@
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
@@ -11,14 +15,24 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"os/exec"
+	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var rootSubject = pkix.Name{
-	Organization: []string{"mkcert development CA"},
+var userAndHostname string
+
+func init() {
+	u, _ := user.Current()
+	if u != nil {
+		userAndHostname = u.Username + "@"
+	}
+	out, _ := exec.Command("hostname").Output()
+	userAndHostname += strings.TrimSpace(string(out))
 }
 
 func (m *mkcert) makeCert(hosts []string) {
@@ -36,11 +50,12 @@ func (m *mkcert) makeCert(hosts []string) {
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{"mkcert development certificate"},
+			Organization:       []string{"mkcert development certificate"},
+			OrganizationalUnit: []string{userAndHostname},
 		},
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now().AddDate(0, 0, -1),
+		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
@@ -74,9 +89,13 @@ func (m *mkcert) makeCert(hosts []string) {
 		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 	fatalIfErr(err, "failed to save certificate key")
 
+	secondLvlWildcardRegexp := regexp.MustCompile(`(?i)^\*\.[0-9a-z_-]+$`)
 	log.Printf("\nCreated a new certificate valid for the following names 📜")
 	for _, h := range hosts {
 		log.Printf(" - %q", h)
+		if secondLvlWildcardRegexp.MatchString(h) {
+			log.Printf("   Warning: many browsers don't support second-level wildcards like %q ⚠️", h)
+		}
 	}
 	log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 }
@@ -122,10 +141,13 @@ func (m *mkcert) newCA() {
 
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
-		Subject:      rootSubject,
+		Subject: pkix.Name{
+			Organization:       []string{"mkcert development CA"},
+			OrganizationalUnit: []string{userAndHostname},
+		},
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now().AddDate(0, 0, -1),
+		NotBefore: time.Now(),
 
 		KeyUsage: x509.KeyUsageCertSign,
 

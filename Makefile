@@ -8,6 +8,8 @@ mkcert: .GOPATH/.ok
 clean:
 	rm -rf bin .GOPATH
 
+unexport GOBIN
+
 .GOPATH/.ok:
 	mkdir -p ".GOPATH/src/$(IMPORT_PATH)"
 	rmdir ".GOPATH/src/$(IMPORT_PATH)"

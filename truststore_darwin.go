@@ -20,6 +20,7 @@ var (
 	FirefoxPath         = "/Applications/Firefox.app"
 	FirefoxProfile      = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
 	CertutilInstallHelp = "brew install nss"
+	NSSBrowsers         = "Firefox"
 )
 
 // https://github.com/golang/go/issues/24652#issuecomment-399826583
@@ -50,7 +51,7 @@ var trustSettingsData = []byte(`
 </array>
 `)
 
-func (m *mkcert) installPlatform() {
+func (m *mkcert) installPlatform() bool {
 	cmd := exec.Command("sudo", "security", "add-trusted-cert", "-d", "-k", "/Library/Keychains/System.keychain", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security add-trusted-cert", out)
@@ -72,7 +73,7 @@ func (m *mkcert) installPlatform() {
 	_, err = plist.Unmarshal(plistData, &plistRoot)
 	fatalIfErr(err, "failed to parse trust settings")
 
-	rootSubjectASN1, _ := asn1.Marshal(rootSubject.ToRDNSequence())
+	rootSubjectASN1, _ := asn1.Marshal(m.caCert.Subject.ToRDNSequence())
 
 	if plistRoot["trustVersion"].(uint64) != 1 {
 		log.Fatalln("ERROR: unsupported trust settings version:", plistRoot["trustVersion"])
@@ -99,10 +100,14 @@ func (m *mkcert) installPlatform() {
 	cmd = exec.Command("sudo", "security", "trust-settings-import", "-d", plistFile.Name())
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-import", out)
+
+	return true
 }
 
-func (m *mkcert) uninstallPlatform() {
+func (m *mkcert) uninstallPlatform() bool {
 	cmd := exec.Command("sudo", "security", "remove-trusted-cert", "-d", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security remove-trusted-cert", out)
+
+	return true
 }
