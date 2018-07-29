@@ -52,6 +52,12 @@ go get -u github.com/FiloSottile/mkcert
 $(go env GOPATH)/bin/mkcert
 ```
 
+On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert-git/).
+
+```
+yaourt -S mkcert-git
+```
+
 Windows will be supported next. (PRs welcome!)
 
 > **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
