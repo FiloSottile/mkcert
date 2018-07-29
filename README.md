@@ -52,7 +52,7 @@ go get -u github.com/FiloSottile/mkcert
 $(go env GOPATH)/bin/mkcert
 ```
 
-On ArchLinux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert-git/).
+On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert-git/).
 
 ```
 yaourt -S mkcert-git
