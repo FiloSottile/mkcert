@@ -47,10 +47,7 @@ func (m *mkcert) checkJava() bool {
 	// exists returns true if the given x509.Certificate's fingerprint
 	// is in the keytool -list output
 	exists := func(c *x509.Certificate, h hash.Hash, keytoolOutput []byte) bool {
-		_, err := h.Write(c.Raw)
-		if err != nil {
-			return false
-		}
+		h.Write(c.Raw)
 		fp := strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 		return bytes.Contains(keytoolOutput, []byte(fp))
 	}
