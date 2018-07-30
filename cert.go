@@ -7,8 +7,10 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/pem"
 	"io/ioutil"
 	"log"
@@ -134,10 +136,23 @@ func (m *mkcert) loadCA() {
 func (m *mkcert) newCA() {
 	priv, err := rsa.GenerateKey(rand.Reader, 3072)
 	fatalIfErr(err, "failed to generate the CA key")
+	pub := priv.PublicKey
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	fatalIfErr(err, "failed to generate serial number")
+
+	spkiASN1, err := x509.MarshalPKIXPublicKey(&pub)
+	fatalIfErr(err, "failed to encode public key")
+
+	var spki struct {
+		Algorithm        pkix.AlgorithmIdentifier
+		SubjectPublicKey asn1.BitString
+	}
+	_, err = asn1.Unmarshal(spkiASN1, &spki)
+	fatalIfErr(err, "failed to decode public key")
+
+	skid := sha1.Sum(spki.SubjectPublicKey.Bytes)
 
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
@@ -145,6 +160,7 @@ func (m *mkcert) newCA() {
 			Organization:       []string{"mkcert development CA"},
 			OrganizationalUnit: []string{userAndHostname},
 		},
+		SubjectKeyId: skid[:],
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
 		NotBefore: time.Now(),
@@ -156,7 +172,6 @@ func (m *mkcert) newCA() {
 		MaxPathLenZero: true,
 	}
 
-	pub := priv.PublicKey
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, &pub, priv)
 	fatalIfErr(err, "failed to generate CA certificate")
 
