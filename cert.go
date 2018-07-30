@@ -159,6 +159,11 @@ func (m *mkcert) newCA() {
 		Subject: pkix.Name{
 			Organization:       []string{"mkcert development CA"},
 			OrganizationalUnit: []string{userAndHostname},
+
+			// The CommonName is required by iOS to show the certificate in the
+			// "Certificate Trust Settings" menu.
+			// https://github.com/FiloSottile/mkcert/issues/47
+			CommonName: "mkcert " + userAndHostname,
 		},
 		SubjectKeyId: skid[:],
 
