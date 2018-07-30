@@ -185,9 +185,9 @@ func (m *mkcert) install() {
 	if hasJava && !m.checkJava() {
 		if hasKeytool {
 			m.installJava()
-			log.Println("The local CA is now installed in Java's trust store ☕️")
+			log.Println("The local CA is now installed in Java's trust store! ☕️")
 		} else {
-			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java! ⚠️`)
+			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java's trust store! ⚠️`)
 		}
 		printed = true
 	}
@@ -212,7 +212,7 @@ func (m *mkcert) uninstall() {
 			m.uninstallJava()
 		} else {
 			log.Print("")
-			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically uninstalled from Java (if it was ever installed)! ⚠`)
+			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically uninstalled from Java's trust store (if it was ever installed)! ⚠️`)
 			log.Print("")
 		}
 	}
