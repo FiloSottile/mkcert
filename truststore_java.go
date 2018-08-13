@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -29,14 +30,19 @@ var (
 )
 
 func init() {
+	keytoolPath = "bin/keytool"
+	if runtime.GOOS == "windows" {
+		keytoolPath += ".exe"
+	}
+
 	if v := os.Getenv("JAVA_HOME"); v != "" {
 		hasJava = true
 		javaHome = v
 
-		_, err := os.Stat(path.Join(v, "bin/keytool"))
+		_, err := os.Stat(path.Join(v, keytoolPath))
 		if err == nil {
 			hasKeytool = true
-			keytoolPath = path.Join(v, "bin/keytool")
+			keytoolPath = path.Join(v, keytoolPath)
 		}
 
 		cacertsPath = path.Join(v, "jre/lib/security/cacerts")
