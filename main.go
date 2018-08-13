@@ -34,6 +34,9 @@ const usage = `Usage of mkcert:
 	$ mkcert '*.example.com'
 	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
 
+	$ mkcert -csr example.com.csr
+	Generate "example.com.pem".
+
 	$ mkcert -pkcs12 example.com
 	Generate "example.com.p12" instead of a PEM file.
 
