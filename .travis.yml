@@ -1,0 +1,21 @@
+language: go
+sudo: false
+go: "1.x"
+install: "# skip"
+
+script:
+  - go vet
+  - GOOS=linux GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-linux-amd64"
+  - GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64"
+  - GOOS=windows GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-windows-amd64.exe"
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  file_glob: true
+  file: "mkcert-*"
+  api_key:
+    secure: "Vd1M3TelYxwpWDe7qawK23LvSttF6xuOjwz9BQOlevidONDx/Wf2JwM8ggSt/mlvYp/FH57PX2TOWqTnVD0Hkt7Ds7CPyLSRwpgQdB8qqYBIuGBmWRXSoHc46qauWiSEJiGOO1/aqfwdROQlu/JvQyNEzzZsLsmqDIqwIOdYcauq3tYjkL48VKensGg0d8JcLuCZ+niXMOYrJa/3EdQFAij1ZlwYZt76dS/XcZ2BKhGexPOrgUaMyl9GOsd7fft71hS0aN4xDHbut5psbe1MJaGan0DUWBiCXLNjFwgFPtEHes3ddq98VVCv7iSDvO2E2nQuwoAS+pQgpPHNpiOzoomdbr/d5OGW2s2xy8tozjoQTUfUQ0wkfTG4YzFKj66xZ4Ut8+/LdN5TZvPITqQqyXJ3a3u0KSivOkjH6M+BtTQjPNY2dlPWJcufWHKVjzhHN82mHbivQyFmJZQ99RtVSr/Nx+wkKZB4nImif+CtJ3hFBdIjGQoruvmrbcC+2U6JaNGmSxxlt1/2he5KCjxsjm6S01cCsNR8ivciAuHi1LAoOza0aWELOMPQz09mvgWX92R/Bj5swgpxZoQr3MmytlTncs9S77Fv6WeUh4Em/fIRAeN8ffzK9t87DbjHgfXvdRKcOWTQbhH9wNUf0VeA58NibFktIZbQwP5088G/o4A="
+  on:
+    repo: FiloSottile/mkcert
+    tags: true
