@@ -16,9 +16,19 @@ var (
 	nssDB        = filepath.Join(os.Getenv("HOME"), ".pki/nssdb")
 )
 
+func hasFirefox() bool {
+	for _, firefoxPath := range FirefoxPaths {
+		_, err := os.Stat(firefoxPath)
+		hasNSS := !os.IsNotExist(err)
+		if hasNSS {
+			return true
+		}
+	}
+	return false
+}
+
 func init() {
-	_, err := os.Stat(FirefoxPath)
-	hasNSS = !os.IsNotExist(err)
+	hasNSS = hasFirefox()
 
 	switch runtime.GOOS {
 	case "darwin":
