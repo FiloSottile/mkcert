@@ -102,6 +102,15 @@ Installing in the trust store does not require the CA key, so you can export the
 
 Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
 
+### Sign "Certificate Signing Requests" (CSR)
+
+Sometime you can't provide a custom secret key, but you can get a CSR and upload a signed certificate afterwards.
+
+1. generate the CSR
+1. execute `mkcert -csr <domain>.csr`
+1. upload the generated certificate
+
+
 ---
 
 This is not an official Google project, just some code that happens to be owned by Google.
