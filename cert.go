@@ -21,10 +21,11 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
-	"software.sslmate.com/src/go-pkcs12"
 	"strconv"
 	"strings"
 	"time"
+
+	"software.sslmate.com/src/go-pkcs12"
 )
 
 var userAndHostname string
@@ -82,21 +83,23 @@ func (m *mkcert) makeCert(hosts []string) {
 		filename += "+" + strconv.Itoa(len(hosts)-1)
 	}
 
-	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
-	fatalIfErr(err, "failed to encode certificate key")
-	err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
-		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
-	fatalIfErr(err, "failed to save certificate key")
+	if !m.pkcs12 {
+		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
+		fatalIfErr(err, "failed to encode certificate key")
+		err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
+			&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
+		fatalIfErr(err, "failed to save certificate key")
 
-	err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
-		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
-	fatalIfErr(err, "failed to save certificate key")
-
-	// generate PKCS#12
-	domainCert, _ := x509.ParseCertificate(cert)
-	pfxData, _ := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
-	err = ioutil.WriteFile(filename+".p12", pfxData, 0644)
-	fatalIfErr(err, "failed to save PKCS#12")
+		err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
+			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
+		fatalIfErr(err, "failed to save certificate key")
+	} else {
+		domainCert, _ := x509.ParseCertificate(cert)
+		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
+		fatalIfErr(err, "failed to generate PKCS#12")
+		err = ioutil.WriteFile(filename+".p12", pfxData, 0644)
+		fatalIfErr(err, "failed to save PKCS#12")
+	}
 
 	secondLvlWildcardRegexp := regexp.MustCompile(`(?i)^\*\.[0-9a-z_-]+$`)
 	log.Printf("\nCreated a new certificate valid for the following names 📜")
@@ -106,7 +109,12 @@ func (m *mkcert) makeCert(hosts []string) {
 			log.Printf("   Warning: many browsers don't support second-level wildcards like %q ⚠️", h)
 		}
 	}
-	log.Printf("\nThe certificate is at \"./%s.pem\", and the key at \"./%s-key.pem\", and the PKCS#12 at \"./%s.p12\" ✅\n\n", filename, filename, filename)
+
+	if !m.pkcs12 {
+		log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
+	} else {
+		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\" ✅\n\n", filename)
+	}
 }
 
 // loadCA will load or create the CA at CAROOT.
