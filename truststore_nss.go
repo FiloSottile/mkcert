@@ -22,7 +22,7 @@ func init() {
 		"/Applications/Firefox Developer Edition.app",
 	} {
 		_, err := os.Stat(path)
-		hasNSS = hasNSS || !os.IsNotExist(err)
+		hasNSS = hasNSS || err == nil
 	}
 
 	switch runtime.GOOS {
@@ -34,7 +34,7 @@ func init() {
 		certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
 
 		_, err = os.Stat(certutilPath)
-		hasCertutil = !os.IsNotExist(err)
+		hasCertutil = err == nil
 
 	case "linux":
 		var err error
@@ -90,7 +90,7 @@ func (m *mkcert) uninstallNSS() {
 
 func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 	profiles, _ := filepath.Glob(FirefoxProfile)
-	if _, err := os.Stat(nssDB); !os.IsNotExist(err) {
+	if _, err := os.Stat(nssDB); err == nil {
 		profiles = append(profiles, nssDB)
 	}
 	if len(profiles) == 0 {
@@ -100,12 +100,12 @@ func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 		if stat, err := os.Stat(profile); err != nil || !stat.IsDir() {
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(profile, "cert9.db")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(profile, "cert9.db")); err == nil {
 			f("sql:" + profile)
 			found++
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); err == nil {
 			f("dbm:" + profile)
 			found++
 		}

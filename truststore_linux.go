@@ -25,12 +25,12 @@ var (
 
 func init() {
 	_, err := os.Stat("/etc/pki/ca-trust/source/anchors/")
-	if !os.IsNotExist(err) {
+	if err == nil {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/mkcert-rootCA.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
 	} else {
 		_, err = os.Stat("/usr/local/share/ca-certificates/")
-		if !os.IsNotExist(err) {
+		if err == nil {
 			SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
 			SystemTrustCommand = []string{"update-ca-certificates"}
 		}
