@@ -1,6 +1,6 @@
 language: go
 sudo: false
-go: "1.x"
+go: stable
 install: "# skip"
 
 script:
