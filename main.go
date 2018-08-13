@@ -50,6 +50,7 @@ func main() {
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	var pkcs12Flag = flag.Bool("pkcs12", false, "generate PKCS#12 instead of PEM")
 	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
+	var csrFlag = flag.String("csr", "", "provide a CSR to be signed")
 	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
 	flag.Parse()
 	if *carootFlag {
@@ -62,8 +63,11 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
+	if *pkcs12Flag && *csrFlag != "" {
+		log.Fatalln("ERROR: you can't use -pkcs12 and -csr at the same time")
+	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag, csr: *csrFlag,
 	}).Run(flag.Args())
 }
 
@@ -75,6 +79,7 @@ type mkcert struct {
 	pkcs12                     bool
 
 	CAROOT string
+	csr    string
 	caCert *x509.Certificate
 	caKey  crypto.PrivateKey
 
@@ -117,6 +122,11 @@ func (m *mkcert) Run(args []string) {
 		if warning {
 			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
 		}
+	}
+
+	if m.csr != "" {
+		m.signCSR()
+		return
 	}
 
 	if len(args) == 0 {

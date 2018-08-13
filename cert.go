@@ -208,6 +208,79 @@ func (m *mkcert) newCA() {
 	log.Printf("Created a new local CA at \"%s\" 💥\n", m.CAROOT)
 }
 
+func (m *mkcert) signCSR() {
+	csrPEMBlock, err := ioutil.ReadFile(m.csr)
+	fatalIfErr(err, "failed to read the CSR")
+	csrDERBlock, _ := pem.Decode(csrPEMBlock)
+	if csrDERBlock == nil {
+		log.Fatalln("ERROR: failed to read the CSR: unexpected content")
+	}
+	if csrDERBlock.Type != "CERTIFICATE REQUEST" {
+		log.Fatalln("ERROR: failed to read the CSR: Must be CERTIFICATE REQUEST not " + csrDERBlock.Type)
+	}
+	csr, err := x509.ParseCertificateRequest(csrDERBlock.Bytes)
+	fatalIfErr(err, "failed to parse the CA key")
+
+	err = csr.CheckSignature()
+	fatalIfErr(err, "invalid CSR signature")
+
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	fatalIfErr(err, "failed to generate serial number")
+
+	tpl := &x509.Certificate{
+		SerialNumber:       serialNumber,
+		Subject:            csr.Subject,
+		PublicKeyAlgorithm: csr.PublicKeyAlgorithm,
+		Version:            csr.Version,
+		Extensions:         csr.Extensions,
+		ExtraExtensions:    csr.ExtraExtensions,
+		DNSNames:           csr.DNSNames,
+		EmailAddresses:     csr.EmailAddresses,
+		IPAddresses:        csr.IPAddresses,
+		URIs:               csr.URIs,
+
+		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotBefore: time.Now(),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, csr.PublicKey, m.caKey)
+	fatalIfErr(err, "failed to sign certificate")
+
+	filename := strings.Replace(tpl.Subject.CommonName, ":", "_", -1)
+	filename = strings.Replace(filename, "*", "_wildcard", -1)
+	sans := len(tpl.IPAddresses) + len(tpl.DNSNames) + len(tpl.EmailAddresses) + len(tpl.URIs)
+	if sans > 1 {
+		filename += "+" + strconv.Itoa(sans-1)
+	}
+
+	log.Printf("Filename: %s", filename)
+
+	if !m.pkcs12 {
+		err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
+			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
+		fatalIfErr(err, "failed to save certificate key")
+	} else {
+		domainCert, _ := x509.ParseCertificate(cert)
+		pfxData, err := pkcs12.Encode(rand.Reader, nil, domainCert, []*x509.Certificate{m.caCert}, "changeit")
+		fatalIfErr(err, "failed to generate PKCS#12")
+		err = ioutil.WriteFile(filename+".p12", pfxData, 0644)
+		fatalIfErr(err, "failed to save PKCS#12")
+	}
+
+	log.Printf("\nSuccessfully signed CSR 📜")
+
+	if !m.pkcs12 {
+		log.Printf("\nThe certificate is at \"./%s.pem\" ✅\n\n", filename)
+	} else {
+		log.Printf("\nThe PKCS#12 is at \"./%s.p12\" ✅\n\n", filename)
+	}
+}
+
 func (m *mkcert) caUniqueName() string {
 	return "mkcert development CA " + m.caCert.SerialNumber.String()
 }
