@@ -30,9 +30,10 @@ var (
 )
 
 func init() {
-	keytoolPath = "bin/keytool"
 	if runtime.GOOS == "windows" {
-		keytoolPath += ".exe"
+		keytoolPath = `bin\keytool.exe`
+	} else {
+		keytoolPath = "bin/keytool"
 	}
 
 	if v := os.Getenv("JAVA_HOME"); v != "" {
