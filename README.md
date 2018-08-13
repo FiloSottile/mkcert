@@ -58,9 +58,22 @@ On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php
 yaourt -S mkcert
 ```
 
-Windows will be supported [soon](https://github.com/FiloSottile/mkcert/pull/46).
+On Windows build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 > **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+
+## Supported root stores
+
+mkcert supports the following root stores:
+
+* macOS system store
+* Windows system store
+* Linux variants that provide either
+    * `update-ca-trust` (Fedora, RHEL, CentOS) or
+    * `update-ca-certificates` (Ubuntu, Debian)
+* Firefox (macOS and Linux only)
+* Chrome and Chromium
+* Java (when `JAVA_HOME` is set)
 
 ## Advanced topics
 
