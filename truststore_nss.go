@@ -20,6 +20,7 @@ func init() {
 	for _, path := range []string{
 		"/usr/bin/firefox", nssDB, "/Applications/Firefox.app",
 		"/Applications/Firefox Developer Edition.app",
+		"C:\\Program Files\\Mozilla Firefox",
 	} {
 		_, err := os.Stat(path)
 		hasNSS = hasNSS || err == nil

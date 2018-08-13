@@ -101,7 +101,7 @@ func (m *mkcert) Run(args []string) {
 			warning = true
 			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
 		}
-		if hasNSS && !m.checkNSS() {
+		if hasNSS && CertutilInstallHelp != "" && !m.checkNSS() {
 			warning = true
 			log.Printf("Warning: the local CA is not installed in the %s trust store! ⚠️", NSSBrowsers)
 		}
@@ -176,6 +176,8 @@ func (m *mkcert) install() {
 	if hasNSS && !m.checkNSS() {
 		if hasCertutil && m.installNSS() {
 			log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
+		} else if CertutilInstallHelp == "" {
+			log.Printf(`Note: %s support is not available on your platform. ℹ️`, NSSBrowsers)
 		} else if !hasCertutil {
 			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
 			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
@@ -200,7 +202,7 @@ func (m *mkcert) uninstall() {
 	if hasNSS {
 		if hasCertutil {
 			m.uninstallNSS()
-		} else {
+		} else if CertutilInstallHelp != "" {
 			log.Print("")
 			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)! ⚠️`, NSSBrowsers)
 			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
