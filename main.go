@@ -174,10 +174,9 @@ func (m *mkcert) install() {
 		printed = true
 	}
 	if hasNSS && !m.checkNSS() {
-		if hasCertutil {
-			m.installNSS()
+		if hasCertutil && m.installNSS() {
 			log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
-		} else {
+		} else if !hasCertutil {
 			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
 			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
 		}

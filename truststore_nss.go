@@ -56,24 +56,21 @@ func (m *mkcert) checkNSS() bool {
 	return success
 }
 
-func (m *mkcert) installNSS() {
+func (m *mkcert) installNSS() bool {
 	if m.forEachNSSProfile(func(profile string) {
 		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
 		out, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Printf("!!! You've hit a known issue. Please report the entire command output at https://github.com/FiloSottile/mkcert/issues/12\nProfile path: %s\nOS: %s/%s\ncertutil: %s\n", profile, runtime.GOOS, runtime.GOARCH, certutilPath)
-			cmd := exec.Command("ls", "-l", profile[4:])
-			cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
-			cmd.Run()
-		}
 		fatalIfCmdErr(err, "certutil -A", out)
 	}) == 0 {
 		log.Printf("ERROR: no %s security databases found", NSSBrowsers)
+		return false
 	}
 	if !m.checkNSS() {
 		log.Printf("Installing in %s failed. Please report the issue with details about your environment at https://github.com/FiloSottile/mkcert/issues/new 👎", NSSBrowsers)
 		log.Printf("Note that if you never started %s, you need to do that at least once.", NSSBrowsers)
+		return false
 	}
+	return true
 }
 
 func (m *mkcert) uninstallNSS() {
