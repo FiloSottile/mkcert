@@ -17,8 +17,13 @@ var (
 )
 
 func init() {
-	_, err := os.Stat(FirefoxPath)
-	hasNSS = !os.IsNotExist(err)
+	for _, path := range []string{
+		"/usr/bin/firefox", nssDB, "/Applications/Firefox.app",
+		"/Applications/Firefox Developer Edition.app",
+	} {
+		_, err := os.Stat(path)
+		hasNSS = hasNSS || !os.IsNotExist(err)
+	}
 
 	switch runtime.GOOS {
 	case "darwin":
@@ -32,9 +37,7 @@ func init() {
 		hasCertutil = !os.IsNotExist(err)
 
 	case "linux":
-		_, err := os.Stat(nssDB)
-		hasNSS = hasNSS && !os.IsNotExist(err)
-
+		var err error
 		certutilPath, err = exec.LookPath("certutil")
 		hasCertutil = err == nil
 	}

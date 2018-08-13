@@ -17,7 +17,6 @@ import (
 )
 
 var (
-	FirefoxPath         = "/Applications/Firefox.app"
 	FirefoxProfile      = os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
 	CertutilInstallHelp = "brew install nss"
 	NSSBrowsers         = "Firefox"
