@@ -46,7 +46,16 @@ func init() {
 			keytoolPath = path.Join(v, keytoolPath)
 		}
 
-		cacertsPath = path.Join(v, "jre/lib/security/cacerts")
+		// Check for lib/security/cacerts
+		_, err = os.Stat(path.Join(v, "lib", "security", "cacerts"))
+		if err == nil {
+			cacertsPath = path.Join(v, "lib", "security", "cacerts")
+		}
+		// Check for jre\lib\security\cacerts (windows)
+		_, err = os.Stat(path.Join(v, "jre", "lib", "security", "cacerts"))
+		if err == nil {
+			cacertsPath = path.Join(v, "jre", "lib", "security", "cacerts")
+		}
 	}
 }
 
