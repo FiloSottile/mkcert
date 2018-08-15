@@ -35,7 +35,7 @@ const usage = `Usage of mkcert:
 	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
 
 	$ mkcert -pkcs12 example.com
-	Generate "example.com.p12" instead of a PEM file.
+	Generate "example.com.p12" instead of a PEM file. The default password is "changeit".
 
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
@@ -49,6 +49,7 @@ func main() {
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	var pkcs12Flag = flag.Bool("pkcs12", false, "generate PKCS#12 instead of PEM")
+	var passwordFlag = flag.String("password", "changeit", "override the default PKCS#12 password of 'changeit'")
 	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
 	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
 	flag.Parse()
@@ -63,7 +64,7 @@ func main() {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag, password: *passwordFlag,
 	}).Run(flag.Args())
 }
 
@@ -73,6 +74,7 @@ const keyName = "rootCA-key.pem"
 type mkcert struct {
 	installMode, uninstallMode bool
 	pkcs12                     bool
+	password                   string
 
 	CAROOT string
 	caCert *x509.Certificate
