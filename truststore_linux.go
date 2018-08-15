@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,19 +20,22 @@ var (
 	CertutilInstallHelp = `apt install libnss3-tools" or "yum install nss-tools`
 	NSSBrowsers         = "Firefox and/or Chrome/Chromium"
 
-	SystemTrustFilename string
-	SystemTrustCommand  []string
+	SystemTrustBaseDir    string
+	SystemTrustFileSuffix string
+	SystemTrustCommand    []string
 )
 
 func init() {
 	_, err := os.Stat("/etc/pki/ca-trust/source/anchors/")
 	if err == nil {
-		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/mkcert-rootCA.pem"
+		SystemTrustBaseDir = "/etc/pki/ca-trust/source/anchors"
+		SystemTrustFileSuffix = "pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
 	} else {
 		_, err = os.Stat("/usr/local/share/ca-certificates/")
 		if err == nil {
-			SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
+			SystemTrustBaseDir = "/usr/local/share/ca-certificates"
+			SystemTrustFileSuffix = "crt"
 			SystemTrustCommand = []string{"update-ca-certificates"}
 		}
 	}
@@ -41,6 +45,11 @@ func init() {
 			SystemTrustCommand = nil
 		}
 	}
+}
+
+func (m *mkcert) systemTrustPath() string {
+	systemTrustFilename := fmt.Sprintf("%s.%s", strings.Replace(m.caUniqueName(), " ", "_", -1), SystemTrustFileSuffix)
+	return filepath.Join(SystemTrustBaseDir, systemTrustFilename)
 }
 
 func (m *mkcert) installPlatform() bool {
@@ -53,7 +62,7 @@ func (m *mkcert) installPlatform() bool {
 	cert, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read root certificate")
 
-	cmd := CommandWithSudo("tee", SystemTrustFilename)
+	cmd := CommandWithSudo("tee", m.systemTrustPath())
 	cmd.Stdin = bytes.NewReader(cert)
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "tee", out)
@@ -70,7 +79,7 @@ func (m *mkcert) uninstallPlatform() bool {
 		return false
 	}
 
-	cmd := CommandWithSudo("rm", SystemTrustFilename)
+	cmd := CommandWithSudo("rm", m.systemTrustPath())
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "rm", out)
 
