@@ -37,6 +37,13 @@ brew install mkcert
 brew install nss # if you use Firefox
 ```
 
+Additionally on macOS, you can also use MacPorts.
+
+```
+sudo port sync
+sudo port install mkcert
+```
+
 On Linux, install `certutil`
 
 ```
