@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,13 +26,13 @@ var (
 
 func init() {
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
-		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/mkcert-rootCA.pem"
+		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
 	} else if pathExists("/usr/local/share/ca-certificates/") {
-		SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
+		SystemTrustFilename = "/usr/local/share/ca-certificates/%s.crt"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	} else if pathExists("/etc/ca-certificates/trust-source/anchors/") {
-		SystemTrustFilename = "/etc/ca-certificates/trust-source/anchors/mkcert-rootCA.crt"
+		SystemTrustFilename = "/etc/ca-certificates/trust-source/anchors/%s.crt"
 		SystemTrustCommand = []string{"trust", "extract-compat"}
 	}
 	if SystemTrustCommand != nil {
@@ -47,6 +48,10 @@ func pathExists(path string) bool {
 	return err == nil
 }
 
+func (m *mkcert) systemTrustFilename() string {
+	return fmt.Sprintf(SystemTrustFilename, strings.Replace(m.caUniqueName(), " ", "_", -1))
+}
+
 func (m *mkcert) installPlatform() bool {
 	if SystemTrustCommand == nil {
 		log.Printf("Installing to the system store is not yet supported on this Linux 😣 but %s will still work.", NSSBrowsers)
@@ -57,7 +62,7 @@ func (m *mkcert) installPlatform() bool {
 	cert, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read root certificate")
 
-	cmd := CommandWithSudo("tee", SystemTrustFilename)
+	cmd := CommandWithSudo("tee", m.systemTrustFilename())
 	cmd.Stdin = bytes.NewReader(cert)
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "tee", out)
@@ -74,9 +79,17 @@ func (m *mkcert) uninstallPlatform() bool {
 		return false
 	}
 
-	cmd := CommandWithSudo("rm", SystemTrustFilename)
+	cmd := CommandWithSudo("rm", "-f", m.systemTrustFilename())
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "rm", out)
+
+	// We used to install under non-unique filenames.
+	legacyFilename := fmt.Sprintf(SystemTrustFilename, "mkcert-rootCA")
+	if pathExists(legacyFilename) {
+		cmd := CommandWithSudo("rm", "-f", legacyFilename)
+		out, err := cmd.CombinedOutput()
+		fatalIfCmdErr(err, "rm (legacy filename)", out)
+	}
 
 	cmd = CommandWithSudo(SystemTrustCommand...)
 	out, err = cmd.CombinedOutput()
