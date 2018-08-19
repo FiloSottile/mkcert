@@ -30,21 +30,27 @@ mkcert automatically creates and installs a local CA in the system root store, a
 
 ## Installation
 
-On macOS, use [Homebrew](https://brew.sh/).
+> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+
+### macOS
+
+On macOS, use [Homebrew](https://brew.sh/)
 
 ```
 brew install mkcert
 brew install nss # if you use Firefox
 ```
 
-Additionally on macOS, you can also use MacPorts.
+or MacPorts.
 
 ```
 sudo port sync
 sudo port install mkcert
 ```
 
-On Linux, install `certutil`
+### Linux
+
+On Linux, first install `certutil`.
 
 ```
 sudo apt install libnss3-tools
@@ -53,18 +59,21 @@ sudo yum install nss-tools
     -or-
 sudo pacman -S nss
 ```
-and install using [Linuxbrew](http://linuxbrew.sh/).
+
+Then you can install using [Linuxbrew](http://linuxbrew.sh/)
 
 ```
 brew install mkcert
 ````
 
-You can also build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+or build from source (requires Go 1.10+)
 
 ```
 go get -u github.com/FiloSottile/mkcert
 $(go env GOPATH)/bin/mkcert
 ```
+
+or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert/).
 
@@ -72,15 +81,15 @@ On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php
 yaourt -S mkcert
 ```
 
-On Windows, use Chocolatey.
+### Windows
+
+On Windows, use Chocolatey
 
 ```
 choco install mkcert
 ```
 
-Or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
-
-> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ## Supported root stores
 
@@ -89,8 +98,9 @@ mkcert supports the following root stores:
 * macOS system store
 * Windows system store
 * Linux variants that provide either
-    * `update-ca-trust` (Fedora, RHEL, CentOS, Arch) or
-    * `update-ca-certificates` (Ubuntu, Debian)
+    * `update-ca-trust` (Fedora, RHEL, CentOS) or
+    * `update-ca-certificates` (Ubuntu, Debian) or
+    * `trust` (Arch)
 * Firefox (macOS and Linux only)
 * Chrome and Chromium
 * Java (when `JAVA_HOME` is set)
