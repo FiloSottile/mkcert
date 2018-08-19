@@ -50,6 +50,8 @@ On Linux, install `certutil`
 sudo apt install libnss3-tools
     -or-
 sudo yum install nss-tools
+    -or-
+sudo pacman -S nss
 ```
 and install using [Linuxbrew](http://linuxbrew.sh/).
 
@@ -87,7 +89,7 @@ mkcert supports the following root stores:
 * macOS system store
 * Windows system store
 * Linux variants that provide either
-    * `update-ca-trust` (Fedora, RHEL, CentOS) or
+    * `update-ca-trust` (Fedora, RHEL, CentOS, Arch) or
     * `update-ca-certificates` (Ubuntu, Debian)
 * Firefox (macOS and Linux only)
 * Chrome and Chromium

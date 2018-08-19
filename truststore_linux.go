@@ -24,16 +24,15 @@ var (
 )
 
 func init() {
-	_, err := os.Stat("/etc/pki/ca-trust/source/anchors/")
-	if err == nil {
+	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/mkcert-rootCA.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
-	} else {
-		_, err = os.Stat("/usr/local/share/ca-certificates/")
-		if err == nil {
-			SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
-			SystemTrustCommand = []string{"update-ca-certificates"}
-		}
+	} else if pathExists("/usr/local/share/ca-certificates/") {
+		SystemTrustFilename = "/usr/local/share/ca-certificates/mkcert-rootCA.crt"
+		SystemTrustCommand = []string{"update-ca-certificates"}
+	} else if pathExists("/etc/ca-certificates/trust-source/anchors/") {
+		SystemTrustFilename = "/etc/ca-certificates/trust-source/anchors/mkcert-rootCA.crt"
+		SystemTrustCommand = []string{"trust", "extract-compat"}
 	}
 	if SystemTrustCommand != nil {
 		_, err := exec.LookPath(SystemTrustCommand[0])
@@ -41,6 +40,11 @@ func init() {
 			SystemTrustCommand = nil
 		}
 	}
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func (m *mkcert) installPlatform() bool {
