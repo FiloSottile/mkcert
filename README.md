@@ -70,7 +70,13 @@ On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php
 yaourt -S mkcert
 ```
 
-On Windows build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+On Windows, use Chocolatey.
+
+```
+choco install mkcert
+```
+
+Or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 > **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
 
