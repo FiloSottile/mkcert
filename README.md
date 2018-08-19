@@ -30,7 +30,7 @@ mkcert automatically creates and installs a local CA in the system root store, a
 
 ## Installation
 
-On macOS, use Homebrew.
+On macOS, use [Homebrew](https://brew.sh/).
 
 ```
 brew install mkcert
@@ -51,8 +51,13 @@ sudo apt install libnss3-tools
     -or-
 sudo yum install nss-tools
 ```
+and install using [Linuxbrew](http://linuxbrew.sh/).
 
-and build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+```
+brew install mkcert
+````
+
+You can also build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ```
 go get -u github.com/FiloSottile/mkcert
