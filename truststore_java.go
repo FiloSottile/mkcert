@@ -13,7 +13,6 @@ import (
 	"hash"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -31,30 +30,29 @@ var (
 
 func init() {
 	if runtime.GOOS == "windows" {
-		keytoolPath = `bin\keytool.exe`
+		keytoolPath = filepath.Join("bin", "keytool.exe")
 	} else {
-		keytoolPath = "bin/keytool"
+		keytoolPath = filepath.Join("bin", "keytool")
 	}
 
 	if v := os.Getenv("JAVA_HOME"); v != "" {
 		hasJava = true
 		javaHome = v
 
-		_, err := os.Stat(path.Join(v, keytoolPath))
+		_, err := os.Stat(filepath.Join(v, keytoolPath))
 		if err == nil {
 			hasKeytool = true
-			keytoolPath = path.Join(v, keytoolPath)
+			keytoolPath = filepath.Join(v, keytoolPath)
 		}
 
-		// Check for lib/security/cacerts
-		_, err = os.Stat(path.Join(v, "lib", "security", "cacerts"))
+		_, err = os.Stat(filepath.Join(v, "lib", "security", "cacerts"))
 		if err == nil {
-			cacertsPath = path.Join(v, "lib", "security", "cacerts")
+			cacertsPath = filepath.Join(v, "lib", "security", "cacerts")
 		}
-		// Check for jre\lib\security\cacerts (windows)
-		_, err = os.Stat(path.Join(v, "jre", "lib", "security", "cacerts"))
+
+		_, err = os.Stat(filepath.Join(v, "jre", "lib", "security", "cacerts"))
 		if err == nil {
-			cacertsPath = path.Join(v, "jre", "lib", "security", "cacerts")
+			cacertsPath = filepath.Join(v, "jre", "lib", "security", "cacerts")
 		}
 	}
 }
