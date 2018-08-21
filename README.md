@@ -131,7 +131,3 @@ Installing in the trust store does not require the CA key, so you can export the
 * run `mkcert -install`
 
 Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
-
----
-
-This is not an official Google project, just some code that happens to be owned by Google.
