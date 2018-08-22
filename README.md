@@ -89,6 +89,12 @@ On Windows, use Chocolatey
 choco install mkcert
 ```
 
+or use Scoop
+
+```
+scoop install mkcert
+```
+
 or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ## Supported root stores
