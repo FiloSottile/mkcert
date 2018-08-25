@@ -41,11 +41,12 @@ brew install mkcert
 brew install nss # if you use Firefox
 ```
 
-or MacPorts.
+or [MacPorts](https://www.macports.org/).
 
 ```
-sudo port sync
+sudo port selfupdate
 sudo port install mkcert
+sudo port install nss # if you use Firefox
 ```
 
 ### Linux
