@@ -29,12 +29,12 @@ func init() {
 	switch runtime.GOOS {
 	case "darwin":
 		out, err := exec.Command("brew", "--prefix", "nss").Output()
-		if err != nil {
-			return
+		if err == nil {
+			certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
+			_, err = os.Stat(certutilPath)
+		} else {
+			certutilPath, err = exec.LookPath("certutil")
 		}
-		certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
-
-		_, err = os.Stat(certutilPath)
 		hasCertutil = err == nil
 
 	case "linux":
