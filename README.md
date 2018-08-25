@@ -45,7 +45,8 @@ or [MacPorts](https://www.macports.org/).
 
 ```
 sudo port selfupdate
-sudo port install mkcert nss
+sudo port install mkcert
+sudo port install nss # if you use Firefox
 ```
 
 ### Linux
