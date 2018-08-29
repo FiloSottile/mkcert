@@ -30,27 +30,51 @@ mkcert automatically creates and installs a local CA in the system root store, a
 
 ## Installation
 
-On macOS, use Homebrew.
+> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+
+### macOS
+
+On macOS, use [Homebrew](https://brew.sh/)
 
 ```
 brew install mkcert
 brew install nss # if you use Firefox
 ```
 
-On Linux, install `certutil`
+or [MacPorts](https://www.macports.org/).
+
+```
+sudo port selfupdate
+sudo port install mkcert
+sudo port install nss # if you use Firefox
+```
+
+### Linux
+
+On Linux, first install `certutil`.
 
 ```
 sudo apt install libnss3-tools
     -or-
 sudo yum install nss-tools
+    -or-
+sudo pacman -S nss
 ```
 
-and build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+Then you can install using [Linuxbrew](http://linuxbrew.sh/)
+
+```
+brew install mkcert
+````
+
+or build from source (requires Go 1.10+)
 
 ```
 go get -u github.com/FiloSottile/mkcert
 $(go env GOPATH)/bin/mkcert
 ```
+
+or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert/).
 
@@ -58,9 +82,21 @@ On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php
 yaourt -S mkcert
 ```
 
-On Windows build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+### Windows
 
-> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+On Windows, use Chocolatey
+
+```
+choco install mkcert
+```
+
+or use Scoop
+
+```
+scoop install mkcert
+```
+
+or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ## Supported root stores
 
@@ -70,7 +106,8 @@ mkcert supports the following root stores:
 * Windows system store
 * Linux variants that provide either
     * `update-ca-trust` (Fedora, RHEL, CentOS) or
-    * `update-ca-certificates` (Ubuntu, Debian)
+    * `update-ca-certificates` (Ubuntu, Debian) or
+    * `trust` (Arch)
 * Firefox (macOS and Linux only)
 * Chrome and Chromium
 * Java (when `JAVA_HOME` is set)
@@ -109,8 +146,3 @@ Sometime you can't provide a custom secret key, but you can get a CSR and upload
 1. generate the CSR
 1. execute `mkcert -csr <domain>.csr`
 1. upload the generated certificate
-
-
----
-
-This is not an official Google project, just some code that happens to be owned by Google.
