@@ -138,3 +138,7 @@ Installing in the trust store does not require the CA key, so you can export the
 * run `mkcert -install`
 
 Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
+
+### Generating a certificate for Windows IIS
+
+If you use Windows IIS as your web server, [follow this guide](https://github.com/FiloSottile/mkcert/windows-iis-docs.md) for creating and installing `.pfx` certificates from `mkcert`-generated `.pem` files.
