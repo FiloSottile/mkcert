@@ -12,6 +12,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"errors"
 	"io/ioutil"
 	"log"
 	"math/big"
@@ -37,6 +38,34 @@ func init() {
 	}
 	out, _ := exec.Command("hostname").Output()
 	userAndHostname += strings.TrimSpace(string(out))
+}
+
+// getFileName generate file name according to flags
+func (m *mkcert) getFileName(w string, args []string) (name string, err error) {
+	filename := strings.Replace(args[0], ":", "_", -1)
+	filename = strings.Replace(filename, "*", "_wildcard", -1)
+	if len(args) > 1 {
+		filename += "+" + strconv.Itoa(len(args)-1)
+	}
+	switch w {
+	case "key":
+		if m.keyFileFlag != "" {
+			return m.keyFileFlag, nil
+		}
+		return filename + "-key.pem", nil
+	case "cert":
+		if m.certFileFlag != "" {
+			return m.certFileFlag, nil
+		}
+		return filename + ".pem", nil
+	case "p12":
+		if m.p12FileFlag != "" {
+			return m.p12FileFlag, nil
+		}
+		return filename + ".p12", nil
+	default:
+		return "", errors.New("failed to generate file name")
+	}
 }
 
 func (m *mkcert) makeCert(hosts []string) {
@@ -76,28 +105,28 @@ func (m *mkcert) makeCert(hosts []string) {
 	pub := priv.PublicKey
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
-
-	filename := strings.Replace(hosts[0], ":", "_", -1)
-	filename = strings.Replace(filename, "*", "_wildcard", -1)
-	if len(hosts) > 1 {
-		filename += "+" + strconv.Itoa(len(hosts)-1)
-	}
-
+	var keyname, certname, p12name string
 	if !m.pkcs12 {
 		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
 		fatalIfErr(err, "failed to encode certificate key")
-		err = ioutil.WriteFile(filename+"-key.pem", pem.EncodeToMemory(
+		keyname, err = m.getFileName("key", hosts)
+		fatalIfErr(err, "failed to generate key file name")
+		err = ioutil.WriteFile(keyname, pem.EncodeToMemory(
 			&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
 		fatalIfErr(err, "failed to save certificate key")
 
-		err = ioutil.WriteFile(filename+".pem", pem.EncodeToMemory(
+		certname, err = m.getFileName("cert", hosts)
+		fatalIfErr(err, "failed to generate cert file name")
+		err = ioutil.WriteFile(certname, pem.EncodeToMemory(
 			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 		fatalIfErr(err, "failed to save certificate key")
 	} else {
 		domainCert, _ := x509.ParseCertificate(cert)
 		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
 		fatalIfErr(err, "failed to generate PKCS#12")
-		err = ioutil.WriteFile(filename+".p12", pfxData, 0644)
+		p12name, err = m.getFileName("p12", hosts)
+		fatalIfErr(err, "failed to generate cert PKCS#12 file name")
+		err = ioutil.WriteFile(p12name, pfxData, 0644)
 		fatalIfErr(err, "failed to save PKCS#12")
 	}
 
@@ -118,9 +147,9 @@ func (m *mkcert) makeCert(hosts []string) {
 	}
 
 	if !m.pkcs12 {
-		log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
+		log.Printf("\nThe certificate is at \"./%s\" and the key at \"./%s\" ✅\n\n", certname, keyname)
 	} else {
-		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\" ✅\n", filename)
+		log.Printf("\nThe PKCS#12 bundle is at \"./%s\" ✅\n", p12name)
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
 }
