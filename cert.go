@@ -113,7 +113,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	if !m.pkcs12 {
 		log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 	} else {
-		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\", and its password is "changeit" ✅\n\n", filename)
+		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\", and its password is \"changeit\" ✅\n\n", filename)
 	}
 }
 
