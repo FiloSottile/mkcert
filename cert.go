@@ -51,6 +51,13 @@ func (m *mkcert) makeCert(hosts []string) {
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	fatalIfErr(err, "failed to generate serial number")
 
+	var extKeyUsage []x509.ExtKeyUsage
+	if m.client {
+		extKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
+	} else {
+		extKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
+	}
+
 	tpl := &x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
@@ -62,7 +69,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		ExtKeyUsage:           extKeyUsage,
 		BasicConstraintsValid: true,
 	}
 	for _, h := range hosts {

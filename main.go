@@ -37,6 +37,9 @@ const usage = `Usage of mkcert:
 	$ mkcert -pkcs12 example.com
 	Generate "example.com.p12" instead of a PEM file.
 
+	$ mkcert -client example.com
+	Generate "example.com.pem" as a client certificate.
+
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
@@ -49,6 +52,7 @@ func main() {
 	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	var pkcs12Flag = flag.Bool("pkcs12", false, "generate PKCS#12 instead of PEM")
+	var clientFlag = flag.Bool("client", false, "generate a client certificate")
 	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
 	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
 	flag.Parse()
@@ -63,7 +67,7 @@ func main() {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag, client: *clientFlag,
 	}).Run(flag.Args())
 }
 
@@ -73,6 +77,7 @@ const keyName = "rootCA-key.pem"
 type mkcert struct {
 	installMode, uninstallMode bool
 	pkcs12                     bool
+	client                     bool
 
 	CAROOT string
 	caCert *x509.Certificate
