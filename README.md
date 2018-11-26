@@ -76,10 +76,12 @@ $(go env GOPATH)/bin/mkcert
 
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
-On Arch Linux you can use your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) to install mkcert from the [PKGBUILD](https://aur.archlinux.org/packages/mkcert/).
+For Arch Linux users, mkcert is available from AUR as [`mkcert`](https://aur.archlinux.org/packages/mkcert/) or [`mkcert-git`](https://aur.archlinux.org/packages/mkcert-git/).
 
-```
-yaourt -S mkcert
+```bash
+git clone https://aur.archlinux.org/mkcert.git
+cd mkcert
+makepkg -si
 ```
 
 ### Windows
