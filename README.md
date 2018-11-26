@@ -100,6 +100,8 @@ scoop install mkcert
 
 or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
+Note: If you're running into permission problems try running `mkcert` as an Administrator.
+
 ## Supported root stores
 
 mkcert supports the following root stores:
