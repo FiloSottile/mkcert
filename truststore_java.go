@@ -58,6 +58,10 @@ func init() {
 }
 
 func (m *mkcert) checkJava() bool {
+	if !hasKeytool {
+		return false
+	}
+
 	// exists returns true if the given x509.Certificate's fingerprint
 	// is in the keytool -list output
 	exists := func(c *x509.Certificate, h hash.Hash, keytoolOutput []byte) bool {
