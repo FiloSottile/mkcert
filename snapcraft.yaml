@@ -1,0 +1,21 @@
+name: mkcert
+version: '1.0'
+summary: A simple zero-config tool to make locally trusted development certificate
+description: |
+  A simple zero-config tool to make locally trusted development certificates with any names you'd like.
+grade: stable
+confinement: strict
+base: core18
+parts:
+  mkcert:
+    plugin: go
+    source: https://github.com/FiloSottile/mkcert.git
+    go-importpath: github.com/FiloSottile/mkcert
+    build-packages:
+      - build-essential
+      - libnss3-tools
+apps:
+  mkcert:
+    command: bin/mkcert
+    plugs:
+      - home
