@@ -114,7 +114,6 @@ func (m *mkcert) execKeytool(cmd *exec.Cmd) ([]byte, error) {
 	out, err := cmd.CombinedOutput()
 	if err != nil && bytes.Contains(out, []byte("java.io.FileNotFoundException")) && runtime.GOOS != "windows" {
 		origArgs := cmd.Args[1:]
-
 		cmd = exec.Command("sudo", keytoolPath)
 		cmd.Args = append(cmd.Args, origArgs...)
 		cmd.Env = []string{
