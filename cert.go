@@ -110,6 +110,13 @@ func (m *mkcert) makeCert(hosts []string) {
 		}
 	}
 
+	for _, h := range hosts {
+		if strings.HasPrefix(h, "*.") {
+			log.Printf("\nReminder: X.509 wildcards only go one level deep, so this won't match a.b.%s ℹ️", h[2:])
+			break
+		}
+	}
+
 	if !m.pkcs12 {
 		log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 	} else {
