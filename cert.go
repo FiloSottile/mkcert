@@ -12,7 +12,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
-	"errors"
 	"io/ioutil"
 	"log"
 	"math/big"
@@ -38,34 +37,6 @@ func init() {
 	}
 	out, _ := exec.Command("hostname").Output()
 	userAndHostname += strings.TrimSpace(string(out))
-}
-
-// getFileName generate file name according to flags
-func (m *mkcert) getFileName(w string, args []string) (name string, err error) {
-	filename := strings.Replace(args[0], ":", "_", -1)
-	filename = strings.Replace(filename, "*", "_wildcard", -1)
-	if len(args) > 1 {
-		filename += "+" + strconv.Itoa(len(args)-1)
-	}
-	switch w {
-	case "key":
-		if m.keyFileFlag != "" {
-			return m.keyFileFlag, nil
-		}
-		return filename + "-key.pem", nil
-	case "cert":
-		if m.certFileFlag != "" {
-			return m.certFileFlag, nil
-		}
-		return filename + ".pem", nil
-	case "p12":
-		if m.p12FileFlag != "" {
-			return m.p12FileFlag, nil
-		}
-		return filename + ".p12", nil
-	default:
-		return "", errors.New("failed to generate file name")
-	}
 }
 
 func (m *mkcert) makeCert(hosts []string) {
@@ -105,28 +76,24 @@ func (m *mkcert) makeCert(hosts []string) {
 	pub := priv.PublicKey
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
-	var keyname, certname, p12name string
+
+	certFile, keyFile, p12File := m.fileNames(hosts)
+
 	if !m.pkcs12 {
 		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
 		fatalIfErr(err, "failed to encode certificate key")
-		keyname, err = m.getFileName("key", hosts)
-		fatalIfErr(err, "failed to generate key file name")
-		err = ioutil.WriteFile(keyname, pem.EncodeToMemory(
+		err = ioutil.WriteFile(keyFile, pem.EncodeToMemory(
 			&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
 		fatalIfErr(err, "failed to save certificate key")
 
-		certname, err = m.getFileName("cert", hosts)
-		fatalIfErr(err, "failed to generate cert file name")
-		err = ioutil.WriteFile(certname, pem.EncodeToMemory(
+		err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
 			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 		fatalIfErr(err, "failed to save certificate key")
 	} else {
 		domainCert, _ := x509.ParseCertificate(cert)
 		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
 		fatalIfErr(err, "failed to generate PKCS#12")
-		p12name, err = m.getFileName("p12", hosts)
-		fatalIfErr(err, "failed to generate cert PKCS#12 file name")
-		err = ioutil.WriteFile(p12name, pfxData, 0644)
+		err = ioutil.WriteFile(p12File, pfxData, 0644)
 		fatalIfErr(err, "failed to save PKCS#12")
 	}
 
@@ -147,11 +114,34 @@ func (m *mkcert) makeCert(hosts []string) {
 	}
 
 	if !m.pkcs12 {
-		log.Printf("\nThe certificate is at \"./%s\" and the key at \"./%s\" ✅\n\n", certname, keyname)
+		log.Printf("\nThe certificate is at \"%s\" and the key at \"%s\" ✅\n\n", certFile, keyFile)
 	} else {
-		log.Printf("\nThe PKCS#12 bundle is at \"./%s\" ✅\n", p12name)
+		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
+}
+
+func (m *mkcert) fileNames(hosts []string) (certFile, keyFile, p12File string) {
+	defaultName := strings.Replace(hosts[0], ":", "_", -1)
+	defaultName = strings.Replace(defaultName, "*", "_wildcard", -1)
+	if len(hosts) > 1 {
+		defaultName += "+" + strconv.Itoa(len(hosts)-1)
+	}
+
+	certFile = "./" + defaultName + ".pem"
+	if m.certFile != "" {
+		certFile = m.certFile
+	}
+	keyFile = "./" + defaultName + "-key.pem"
+	if m.keyFile != "" {
+		keyFile = m.keyFile
+	}
+	p12File = "./" + defaultName + ".p12"
+	if m.p12File != "" {
+		p12File = m.p12File
+	}
+
+	return
 }
 
 // loadCA will load or create the CA at CAROOT.
@@ -171,11 +161,11 @@ func (m *mkcert) loadCA() {
 	m.caCert, err = x509.ParseCertificate(certDERBlock.Bytes)
 	fatalIfErr(err, "failed to parse the CA certificate")
 
-	if _, err := os.Stat(filepath.Join(m.CAROOT, keyName)); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(m.CAROOT, rootKeyName)); os.IsNotExist(err) {
 		return // keyless mode, where only -install works
 	}
 
-	keyPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, keyName))
+	keyPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootKeyName))
 	fatalIfErr(err, "failed to read the CA key")
 	keyDERBlock, _ := pem.Decode(keyPEMBlock)
 	if keyDERBlock == nil || keyDERBlock.Type != "PRIVATE KEY" {
@@ -234,7 +224,7 @@ func (m *mkcert) newCA() {
 
 	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
 	fatalIfErr(err, "failed to encode CA key")
-	err = ioutil.WriteFile(filepath.Join(m.CAROOT, keyName), pem.EncodeToMemory(
+	err = ioutil.WriteFile(filepath.Join(m.CAROOT, rootKeyName), pem.EncodeToMemory(
 		&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0400)
 	fatalIfErr(err, "failed to save CA key")
 
