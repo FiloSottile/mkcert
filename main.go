@@ -31,7 +31,7 @@ const usage = `Usage of mkcert:
 	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
 	Generate "example.com+4.pem" and "example.com+4-key.pem".
 
-	$ mkcert '*.example.com'
+	$ mkcert "*.example.com"
 	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
 
 	$ mkcert -pkcs12 example.com
