@@ -40,6 +40,8 @@ const usage = `Usage of mkcert:
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
+Use -cert-file, -key-file and -p12-file to customize the output paths.
+
 Change the CA certificate and key storage location by setting $CAROOT,
 print it with "mkcert -CAROOT".
 `
@@ -50,10 +52,9 @@ func main() {
 	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
 	var pkcs12Flag = flag.Bool("pkcs12", false, "generate PKCS#12 instead of PEM")
 	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
-	// customize file name according to issue#72
-	var keyFileFlag = flag.String("key-file", "", "customlize your key file name")
-	var certFileFlag = flag.String("cert-file", "", "customlize your cert file name")
-	var p12FileFlag = flag.String("p12-file", "", "customlize your p12 file name")
+	var certFileFlag = flag.String("cert-file", "", "output certificate file path")
+	var keyFileFlag = flag.String("key-file", "", "output key file path")
+	var p12FileFlag = flag.String("p12-file", "", "output PKCS#12 file path")
 	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
 	flag.Parse()
 	if *carootFlag {
@@ -68,19 +69,17 @@ func main() {
 	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag,
-		keyFileFlag:  *keyFileFlag,
-		certFileFlag: *certFileFlag,
-		p12FileFlag:  *p12FileFlag,
+		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
 }
 
 const rootName = "rootCA.pem"
-const keyName = "rootCA-key.pem"
+const rootKeyName = "rootCA-key.pem"
 
 type mkcert struct {
-	installMode, uninstallMode             bool
-	pkcs12                                 bool
-	keyFileFlag, certFileFlag, p12FileFlag string
+	installMode, uninstallMode bool
+	pkcs12                     bool
+	keyFile, certFile, p12File string
 
 	CAROOT string
 	caCert *x509.Certificate
