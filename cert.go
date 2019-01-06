@@ -113,7 +113,8 @@ func (m *mkcert) makeCert(hosts []string) {
 	if !m.pkcs12 {
 		log.Printf("\nThe certificate is at \"./%s.pem\" and the key at \"./%s-key.pem\" ✅\n\n", filename, filename)
 	} else {
-		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\" ✅\n\n", filename)
+		log.Printf("\nThe PKCS#12 bundle is at \"./%s.p12\" ✅\n", filename)
+		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
 }
 
@@ -188,8 +189,8 @@ func (m *mkcert) newCA() {
 		KeyUsage: x509.KeyUsageCertSign,
 
 		BasicConstraintsValid: true,
-		IsCA:           true,
-		MaxPathLenZero: true,
+		IsCA:                  true,
+		MaxPathLenZero:        true,
 	}
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, &pub, priv)
