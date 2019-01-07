@@ -112,7 +112,7 @@ mkcert supports the following root stores:
     * `update-ca-trust` (Fedora, RHEL, CentOS) or
     * `update-ca-certificates` (Ubuntu, Debian) or
     * `trust` (Arch)
-* Firefox (macOS and Linux only)
+* Firefox (macOS and Linux only) via [Network Security Services](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS) (the "nss"-related installs referred to above)
 * Chrome and Chromium
 * Java (when `JAVA_HOME` is set)
 
