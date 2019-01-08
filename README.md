@@ -95,6 +95,7 @@ choco install mkcert
 or use Scoop
 
 ```
+scoop bucket add extras
 scoop install mkcert
 ```
 
