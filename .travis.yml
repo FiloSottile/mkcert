@@ -6,6 +6,7 @@ install: "# skip"
 script:
   - go vet
   - GOOS=linux GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-linux-amd64"
+  - GOOS=linux GOARCH=arm GOARM=6 go build -o "mkcert-$(git describe --tags)-linux-arm"
   - GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64"
   - GOOS=windows GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-windows-amd64.exe"
 
