@@ -213,6 +213,20 @@ func (m *mkcert) newCA() {
 		NotBefore: time.Now(),
 
 		KeyUsage: x509.KeyUsageCertSign,
+		ExtraExtensions: []pkix.Extension {
+			pkix.Extension {
+				Id: asn1.ObjectIdentifier{2, 5, 29, 30}, // Name constraints
+				Critical: true,
+				Value: []byte{
+					0x30, 0x10, // SEQUENCE (NameConstraints), len:16
+						0xa0, 0x0e, // GeneralSubtrees (permittedSubtrees), len:14
+							0x30, 0x0c, // SEQUENCE, len:12
+								0x82, 0x0a, //IA5String?, len:10
+									// .localhost
+									0x2e, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x68, 0x6f, 0x73, 0x74,
+				},
+			},
+		},
 
 		BasicConstraintsValid: true,
 		IsCA:                  true,
