@@ -13,16 +13,37 @@ var (
 	hasNSS       bool
 	hasCertutil  bool
 	certutilPath string
-	nssDB        = filepath.Join(os.Getenv("HOME"), ".pki/nssdb")
+	nssDB        string = findNssDB()
 )
 
-func init() {
+func findNssDB() string {
 	for _, path := range []string{
-		"/usr/bin/firefox", nssDB, "/Applications/Firefox.app",
+		filepath.Join(os.Getenv("HOME"), ".pki/nssdb"),
+		filepath.Join(os.Getenv("HOME"), "snap/chromium/current/.pki/nssdb"), // Ubuntu snap's
+		"/etc/pki/nssdb", // CentOS 7
+	} {
+		_, err := os.Stat(path)
+		if err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
+func init() {
+	binaryPaths := []string{
+		"/usr/bin/firefox",
+		"/Applications/Firefox.app",
 		"/Applications/Firefox Developer Edition.app",
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
-	} {
+	}
+	if nssDB != "" {
+		binaryPaths = append(binaryPaths, nssDB)
+	}
+
+
+	for _, path := range binaryPaths {
 		_, err := os.Stat(path)
 		hasNSS = hasNSS || err == nil
 	}
