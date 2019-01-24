@@ -76,6 +76,12 @@ $(go env GOPATH)/bin/mkcert
 
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
+To download the latest version the pre-built binaries you can use this script:
+
+```bash
+bash <(wget -qO- https://git.io/mkcert) --install-dir=/usr/local/bin
+```
+
 For Arch Linux users, mkcert is available from AUR as [`mkcert`](https://aur.archlinux.org/packages/mkcert/) or [`mkcert-git`](https://aur.archlinux.org/packages/mkcert-git/).
 
 ```bash
