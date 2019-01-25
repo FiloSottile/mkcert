@@ -76,16 +76,12 @@ $(go env GOPATH)/bin/mkcert
 
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
-To download the latest version the pre-built binaries you can use this script:
-
-Import public GPG key [mkcert.asc](todo-path-mkcert.asc):
+To download the latest version the pre-built binaries you can use this script: [get.sh](get.sh).
+By default verification gpg signature so you should import public GPG key [mkcert.asc](todo-url-mkcert.asc):
 
 ```bash
 gpg --import mkcert.asc
-```
- 
-```bash
-bash <(wget -qO- https://git.io/mkcert) --install-dir=/usr/local/bin
+./get.sh --install-dir=/usr/local/bin
 ```
 
 For Arch Linux users, mkcert is available from AUR as [`mkcert`](https://aur.archlinux.org/packages/mkcert/) or [`mkcert-git`](https://aur.archlinux.org/packages/mkcert-git/).

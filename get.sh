@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 #
-# Installation script gets latest mkcert release for platform and makes runnable binary.
+# Script gets latest mkcert release for platform and makes runnable binary.
+# By default verification gpg signature todo-url-mkcert.asc.
+# This script is meant for quick & easy gets via:
 #
-# This script is meant for quick & easy install via:
-#
-#   'bash <(curl -sSL https://git.io/mkcert)'
+#   'gpg --import mkcert.asc'
+#   'bash <(curl -sSL https://raw.githubusercontent.com/FiloSottile/mkcert/master/get.sh)'
 #
 # or:
 #
-#   'bash <(wget -qO- https://git.io/mkcert) --install-dir=/usr/local/bin'
+#   'bash <(wget -qO- https://raw.githubusercontent.com/FiloSottile/mkcert/master/get.sh)'
 #
-# By default, this installs 'mkcert' to current directory.
+# or:
+#
+#   'bash <(curl -sSL https://git.io/mkcert)'
+#
+# By default, this script saved 'mkcert' to current directory.
 # If necessary, change destination directory:
 #
 #   'bash <(curl -sSL https://git.io/mkcert) --install-dir=/usr/local/bin'
 #
 # Make pull requests at:
+#
 # https://github.com/FiloSottile/mkcert/blob/master/get.sh
 #
 
@@ -30,7 +36,7 @@ installDir=$(pwd)
 
 usage() {
 	cat <<EOF
-Installation script gets latest mkcert release for platform and makes runnable binary
+Script gets latest mkcert release for platform and makes runnable binary
 
 Run options:
 
