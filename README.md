@@ -78,6 +78,12 @@ or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 To download the latest version the pre-built binaries you can use this script:
 
+Import public GPG key [mkcert.asc](todo-path-mkcert.asc):
+
+```bash
+gpg --import mkcert.asc
+```
+ 
 ```bash
 bash <(wget -qO- https://git.io/mkcert) --install-dir=/usr/local/bin
 ```

@@ -19,36 +19,38 @@
 # https://github.com/FiloSottile/mkcert/blob/master/get.sh
 #
 
-set -o errexit
-set -o pipefail
-
 EX_OK=0
 EX_ERROR=1
 EX_WARNING=2
 
 repository="FiloSottile/mkcert"
+
+verifySignature=true
 installDir=$(pwd)
 
 usage() {
-cat << EOF
+	cat <<EOF
 Installation script gets latest mkcert release for platform and makes runnable binary
 
 Run options:
 
-    -d, --debug	             debug and trace mode
-    --install-dir="pwd"      accepts a target installation directory
-    -h, --help               display this help and exit
+    -d, --debug	                 debug and trace mode
+    -n, --no-verify-signature    skip verify signature
+    -i, --install-dir="pwd"      accepts a target installation directory
+    -h, --help                   display this help and exit
 EOF
 }
 
 fail() {
+	set -o errexit
 	msg=$1
-	echo "Error: $msg" 1>&2
+	printf "Error: %s\n" "$msg" 1>&2
 	exit ${EX_ERROR}
 }
 
 download() {
 	url=${1}
+
 	if cmd=$(command -v curl); then
 		cmd="$cmd --fail --silent --location"
 	elif cmd=$(command -v wget); then
@@ -60,24 +62,39 @@ download() {
 	${cmd} "$url"
 }
 
+verify() {
+	filePath=${1}
+	signaturePath=${2}
+
+	if ! cmd=$(command -v gpg); then
+		fail "Require gpg are installed"
+	fi
+
+	status=$(${cmd} --status-fd 1 --verify "$signaturePath" "$filePath" 2>/dev/null | grep "^\[GNUPG:\]")
+
+	if ! printf "%s" "$status" | grep --quiet --no-messages "GOODSIG"; then
+		fail "$status"
+	fi
+}
+
 platform() {
 	ext=""
 	case $(uname -s) in
-		Darwin)
-			os="macos"
+	Darwin)
+		os="macos"
 		;;
-		Linux)
-			os="linux"
+	Linux)
+		os="linux"
 		;;
-		Windows)
-			os="windows"
-			ext=".exe"
+	Windows)
+		os="windows"
+		ext=".exe"
 		;;
-		*) fail "Unsupported OS: $(uname -s)";;
+	*) fail "Unsupported OS: $(uname -s)" ;;
 	esac
 
 	arch="amd64"
-	if ! uname -m | grep 64 > /dev/null; then
+	if ! uname -m | grep 64 >/dev/null; then
 		fail "Only arch x64 is currently supported. Your arch is: $(uname -m)"
 	fi
 
@@ -89,22 +106,25 @@ option() {
 
 		option="$1"
 
-		case $option in
-			--install-dir=*)
-				installDir="${option#*=}"
-				;;
-			-d | --debug)
-				set -o xtrace
-				;;
-			-h | --help)
-				usage
-				exit ${EX_OK}
-				;;
-			*)
-				echo "Unknown option: ${option}"
-				usage
-				exit ${EX_WARNING}
-				;;
+		case ${option} in
+		-d | --debug)
+			set -o xtrace
+			;;
+		-i=* | --install-dir=*)
+			installDir="${option#*=}"
+			;;
+		-n | --no-verify-signature)
+			verifySignature=false
+			;;
+		-h | --help)
+			usage
+			exit ${EX_OK}
+			;;
+		*)
+			printf "Unknown option: %s" "$option"
+			usage
+			exit ${EX_WARNING}
+			;;
 		esac
 		shift # past argument
 	done
@@ -112,13 +132,28 @@ option() {
 
 main() {
 	option "$@"
-	latest=$(download "https://api.github.com/repos/$repository/releases/latest" | grep tag_name | head -n 1 | cut -d '"' -f 4)
+
+	latest=$(download "https://api.github.com/repos/FiloSottile/mkcert/releases/latest" | grep tag_name | head -n 1 | cut -d '"' -f 4)
 	file="mkcert-$latest-$(platform)"
+	signature="$file.sig"
 	path="$installDir/mkcert"
-	printf "%s" "Download $latest into $path..."
-	download "https://github.com/$repository/releases/download/$latest/$file" > "$path"
+
+	printf "Download file: %s" "$file"
+	download "https://github.com/$repository/releases/download/$latest/$file" >"$file"
+
+	if "$verifySignature" = true; then
+		printf " signature is"
+		download "https://github.com/$repository/releases/download/$latest/$signature" >"$signature"
+		verify "$file" "$signature"
+		rm -f "$signature"
+		printf " valid"
+	fi
+
+	printf " DONE\n"
+
+	mv "$file" "$path"
 	chmod +x "$path"
-	printf "DONE\n"
+	printf "Made runnable binary %s DONE\n" "$path"
 }
 
 main "$@"
