@@ -139,7 +139,7 @@ option() {
 main() {
 	option "$@"
 
-	latest=$(download "https://api.github.com/repos/FiloSottile/mkcert/releases/latest" | grep tag_name | head -n 1 | cut -d '"' -f 4)
+	latest=$(download "https://api.github.com/repos/$repository/releases/latest" | grep tag_name | head -n 1 | cut -d '"' -f 4)
 	file="mkcert-$latest-$(platform)"
 	signature="$file.sig"
 	path="$installDir/mkcert"
