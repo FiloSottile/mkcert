@@ -119,6 +119,17 @@ mkcert supports the following root stores:
 
 ## Advanced topics
 
+### Advanced options
+
+```
+	-cert-file FILE, -key-file FILE, -p12-file FILE
+	    Customize the output paths.
+
+	-pkcs12
+	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
+	    containing certificate and key for legacy applications.
+```
+
 ### Mobile devices
 
 For the certificates to be trusted on mobile devices, you will have to install the root CA. It's the `rootCA.pem` file in the folder printed by `mkcert -CAROOT`.

@@ -20,7 +20,7 @@ import (
 	"golang.org/x/net/idna"
 )
 
-const usage = `Usage of mkcert:
+const shortUsage = `Usage of mkcert:
 
 	$ mkcert -install
 	Install the local CA in the system trust store.
@@ -31,32 +31,54 @@ const usage = `Usage of mkcert:
 	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
 	Generate "example.com+4.pem" and "example.com+4-key.pem".
 
-	$ mkcert "*.example.com"
-	Generate "_wildcard.example.com.pem" and "_wildcard.example.com-key.pem".
-
-	$ mkcert -pkcs12 example.com
-	Generate "example.com.p12" instead of a PEM file.
+	$ mkcert "*.example.it"
+	Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
 
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
-Use -cert-file, -key-file and -p12-file to customize the output paths.
+`
 
-Change the CA certificate and key storage location by setting $CAROOT,
-print it with "mkcert -CAROOT".
+const advancedUsage = `Advanced options:
+
+	-cert-file FILE, -key-file FILE, -p12-file FILE
+	    Customize the output paths.
+
+	-pkcs12
+	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
+	    containing certificate and key for legacy applications.
+
+	-CAROOT
+	    Print the CA certificate and key storage location.
+
+	$CAROOT (environment variable)
+	    Set the CA certificate and key storage location. (This allows
+	    maintaining multiple local CAs in parallel.)
+
 `
 
 func main() {
 	log.SetFlags(0)
-	var installFlag = flag.Bool("install", false, "install the local root CA in the system trust store")
-	var uninstallFlag = flag.Bool("uninstall", false, "uninstall the local root CA from the system trust store")
-	var pkcs12Flag = flag.Bool("pkcs12", false, "generate PKCS#12 instead of PEM")
-	var carootFlag = flag.Bool("CAROOT", false, "print the CAROOT path")
-	var certFileFlag = flag.String("cert-file", "", "output certificate file path")
-	var keyFileFlag = flag.String("key-file", "", "output key file path")
-	var p12FileFlag = flag.String("p12-file", "", "output PKCS#12 file path")
-	flag.Usage = func() { fmt.Fprintf(flag.CommandLine.Output(), usage) }
+	var (
+		installFlag   = flag.Bool("install", false, "")
+		uninstallFlag = flag.Bool("uninstall", false, "")
+		pkcs12Flag    = flag.Bool("pkcs12", false, "")
+		helpFlag      = flag.Bool("help", false, "")
+		carootFlag    = flag.Bool("CAROOT", false, "")
+		certFileFlag  = flag.String("cert-file", "", "")
+		keyFileFlag   = flag.String("key-file", "", "")
+		p12FileFlag   = flag.String("p12-file", "", "")
+	)
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), shortUsage)
+		fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
+	}
 	flag.Parse()
+	if *helpFlag {
+		fmt.Fprintf(flag.CommandLine.Output(), shortUsage)
+		fmt.Fprintf(flag.CommandLine.Output(), advancedUsage)
+		return
+	}
 	if *carootFlag {
 		if *installFlag || *uninstallFlag {
 			log.Fatalln("ERROR: you can't set -[un]install and -CAROOT at the same time")
@@ -127,7 +149,7 @@ func (m *mkcert) Run(args []string) {
 	}
 
 	if len(args) == 0 {
-		log.Printf("\n%s", usage)
+		flag.Usage()
 		return
 	}
 
