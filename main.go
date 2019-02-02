@@ -55,6 +55,10 @@ const advancedUsage = `Advanced options:
 	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
 	    containing certificate and key for legacy applications.
 
+	-csr CSR
+	    Generate a certificate based on the supplied CSR. Conflicts with
+	    all other flags and arguments except -install and -cert-file.
+
 	-CAROOT
 	    Print the CA certificate and key storage location.
 
@@ -79,6 +83,7 @@ func main() {
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
+		csrFlag       = flag.String("csr", "", "")
 		certFileFlag  = flag.String("cert-file", "", "")
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
@@ -103,8 +108,14 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
+	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *clientFlag) {
+		log.Fatalln("ERROR: can only combine -csr with -install and -cert-file")
+	}
+	if *csrFlag != "" && flag.NArg() != 0 {
+		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
+	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
@@ -117,6 +128,7 @@ type mkcert struct {
 	installMode, uninstallMode bool
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
+	csrPath                    string
 
 	CAROOT string
 	caCert *x509.Certificate
@@ -161,6 +173,11 @@ func (m *mkcert) Run(args []string) {
 		if warning {
 			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
 		}
+	}
+
+	if m.csrPath != "" {
+		m.makeCertFromCSR()
+		return
 	}
 
 	if len(args) == 0 {

@@ -51,12 +51,8 @@ func (m *mkcert) makeCert(hosts []string) {
 	fatalIfErr(err, "failed to generate certificate key")
 	pub := priv.(crypto.Signer).Public()
 
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	fatalIfErr(err, "failed to generate serial number")
-
 	tpl := &x509.Certificate{
-		SerialNumber: serialNumber,
+		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"mkcert development certificate"},
 			OrganizationalUnit: []string{userAndHostname},
@@ -100,7 +96,7 @@ func (m *mkcert) makeCert(hosts []string) {
 
 		err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
 			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
-		fatalIfErr(err, "failed to save certificate key")
+		fatalIfErr(err, "failed to save certificate")
 	} else {
 		domainCert, _ := x509.ParseCertificate(cert)
 		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
@@ -109,6 +105,17 @@ func (m *mkcert) makeCert(hosts []string) {
 		fatalIfErr(err, "failed to save PKCS#12")
 	}
 
+	m.printHosts(hosts)
+
+	if !m.pkcs12 {
+		log.Printf("\nThe certificate is at \"%s\" and the key at \"%s\" ✅\n\n", certFile, keyFile)
+	} else {
+		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
+		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
+	}
+}
+
+func (m *mkcert) printHosts(hosts []string) {
 	secondLvlWildcardRegexp := regexp.MustCompile(`(?i)^\*\.[0-9a-z_-]+$`)
 	log.Printf("\nCreated a new certificate valid for the following names 📜")
 	for _, h := range hosts {
@@ -123,13 +130,6 @@ func (m *mkcert) makeCert(hosts []string) {
 			log.Printf("\nReminder: X.509 wildcards only go one level deep, so this won't match a.b.%s ℹ️", h[2:])
 			break
 		}
-	}
-
-	if !m.pkcs12 {
-		log.Printf("\nThe certificate is at \"%s\" and the key at \"%s\" ✅\n\n", certFile, keyFile)
-	} else {
-		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
-		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
 }
 
@@ -164,6 +164,72 @@ func (m *mkcert) fileNames(hosts []string) (certFile, keyFile, p12File string) {
 	}
 
 	return
+}
+
+func randomSerialNumber() *big.Int {
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	fatalIfErr(err, "failed to generate serial number")
+	return serialNumber
+}
+
+func (m *mkcert) makeCertFromCSR() {
+	if m.caKey == nil {
+		log.Fatalln("ERROR: can't create new certificates because the CA key (rootCA-key.pem) is missing")
+	}
+
+	csrPEMBytes, err := ioutil.ReadFile(m.csrPath)
+	fatalIfErr(err, "failed to read the CSR")
+	csrPEM, _ := pem.Decode(csrPEMBytes)
+	if csrPEM == nil {
+		log.Fatalln("ERROR: failed to read the CSR: unexpected content")
+	}
+	if csrPEM.Type != "CERTIFICATE REQUEST" {
+		log.Fatalln("ERROR: failed to read the CSR: expected CERTIFICATE REQUEST, got " + csrPEM.Type)
+	}
+	csr, err := x509.ParseCertificateRequest(csrPEM.Bytes)
+	fatalIfErr(err, "failed to parse the CSR")
+	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
+
+	tpl := &x509.Certificate{
+		SerialNumber:    randomSerialNumber(),
+		Subject:         csr.Subject,
+		ExtraExtensions: csr.Extensions, // includes requested SANs
+
+		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotBefore: time.Now(),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+
+		// If the CSR does not request a SAN extension, fix it up for them as
+		// the Common Name field does not work in modern browsers. Otherwise,
+		// this will get overridden.
+		DNSNames: []string{csr.Subject.CommonName},
+	}
+
+	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, csr.PublicKey, m.caKey)
+	fatalIfErr(err, "failed to generate certificate")
+
+	var hosts []string
+	hosts = append(hosts, csr.DNSNames...)
+	hosts = append(hosts, csr.EmailAddresses...)
+	for _, ip := range csr.IPAddresses {
+		hosts = append(hosts, ip.String())
+	}
+	if len(hosts) == 0 {
+		hosts = []string{csr.Subject.CommonName}
+	}
+	certFile, _, _ := m.fileNames(hosts)
+
+	err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
+		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
+	fatalIfErr(err, "failed to save certificate")
+
+	m.printHosts(hosts)
+
+	log.Printf("\nThe certificate is at \"%s\" ✅\n\n", certFile)
 }
 
 // loadCA will load or create the CA at CAROOT.
@@ -202,10 +268,6 @@ func (m *mkcert) newCA() {
 	fatalIfErr(err, "failed to generate the CA key")
 	pub := priv.(crypto.Signer).Public()
 
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	fatalIfErr(err, "failed to generate serial number")
-
 	spkiASN1, err := x509.MarshalPKIXPublicKey(pub)
 	fatalIfErr(err, "failed to encode public key")
 
@@ -219,7 +281,7 @@ func (m *mkcert) newCA() {
 	skid := sha1.Sum(spki.SubjectPublicKey.Bytes)
 
 	tpl := &x509.Certificate{
-		SerialNumber: serialNumber,
+		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"mkcert development CA"},
 			OrganizationalUnit: []string{userAndHostname},
