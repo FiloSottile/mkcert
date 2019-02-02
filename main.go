@@ -44,6 +44,9 @@ const advancedUsage = `Advanced options:
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 	    Customize the output paths.
 
+	-client
+	    Generate a certificate for client authentication.
+
 	-ecdsa
 	    Generate a certificate with an ECDSA key.
 
@@ -67,6 +70,7 @@ func main() {
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
+		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
 		certFileFlag  = flag.String("cert-file", "", "")
@@ -95,7 +99,7 @@ func main() {
 	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag,
-		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag,
+		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
 }
@@ -105,7 +109,7 @@ const rootKeyName = "rootCA-key.pem"
 
 type mkcert struct {
 	installMode, uninstallMode bool
-	pkcs12, ecdsa              bool
+	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 
 	CAROOT string

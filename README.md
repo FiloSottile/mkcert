@@ -125,6 +125,9 @@ mkcert supports the following root stores:
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 	    Customize the output paths.
 
+	-client
+	    Generate a certificate for client authentication.
+
 	-ecdsa
 	    Generate a certificate with an ECDSA key.
 

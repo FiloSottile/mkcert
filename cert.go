@@ -76,6 +76,9 @@ func (m *mkcert) makeCert(hosts []string) {
 			tpl.DNSNames = append(tpl.DNSNames, h)
 		}
 	}
+	if m.client {
+		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
+	}
 
 	// IIS (the main target of PKCS #12 files), only shows the deprecated
 	// Common Name in the UI. See issue #115.
