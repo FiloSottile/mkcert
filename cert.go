@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"software.sslmate.com/src/go-pkcs12"
+	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
 var userAndHostname string
@@ -71,6 +71,12 @@ func (m *mkcert) makeCert(hosts []string) {
 		} else {
 			tpl.DNSNames = append(tpl.DNSNames, h)
 		}
+	}
+
+	// IIS (the main target of PKCS #12 files), only shows the deprecated
+	// Common Name in the UI. See issue #115.
+	if m.pkcs12 {
+		tpl.Subject.CommonName = hosts[0]
 	}
 
 	pub := priv.PublicKey
