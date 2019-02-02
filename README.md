@@ -125,6 +125,9 @@ mkcert supports the following root stores:
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 	    Customize the output paths.
 
+	-ecdsa
+	    Generate a certificate with an ECDSA key.
+
 	-pkcs12
 	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
 	    containing certificate and key for legacy applications.

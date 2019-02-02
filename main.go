@@ -44,6 +44,9 @@ const advancedUsage = `Advanced options:
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 	    Customize the output paths.
 
+	-ecdsa
+	    Generate a certificate with an ECDSA key.
+
 	-pkcs12
 	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
 	    containing certificate and key for legacy applications.
@@ -63,6 +66,7 @@ func main() {
 		installFlag   = flag.Bool("install", false, "")
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
+		ecdsaFlag     = flag.Bool("ecdsa", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
 		certFileFlag  = flag.String("cert-file", "", "")
@@ -90,7 +94,8 @@ func main() {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag, pkcs12: *pkcs12Flag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag,
+		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
 }
@@ -100,7 +105,7 @@ const rootKeyName = "rootCA-key.pem"
 
 type mkcert struct {
 	installMode, uninstallMode bool
-	pkcs12                     bool
+	pkcs12, ecdsa              bool
 	keyFile, certFile, p12File string
 
 	CAROOT string

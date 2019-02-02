@@ -5,6 +5,9 @@
 package main
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
@@ -44,8 +47,9 @@ func (m *mkcert) makeCert(hosts []string) {
 		log.Fatalln("ERROR: can't create new certificates because the CA key (rootCA-key.pem) is missing")
 	}
 
-	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	priv, err := m.generateKey(false)
 	fatalIfErr(err, "failed to generate certificate key")
+	pub := priv.(crypto.Signer).Public()
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
@@ -79,8 +83,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		tpl.Subject.CommonName = hosts[0]
 	}
 
-	pub := priv.PublicKey
-	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, &pub, m.caKey)
+	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, pub, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
 
 	certFile, keyFile, p12File := m.fileNames(hosts)
@@ -125,6 +128,16 @@ func (m *mkcert) makeCert(hosts []string) {
 		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
+}
+
+func (m *mkcert) generateKey(rootCA bool) (crypto.PrivateKey, error) {
+	if m.ecdsa {
+		return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	}
+	if rootCA {
+		return rsa.GenerateKey(rand.Reader, 3072)
+	}
+	return rsa.GenerateKey(rand.Reader, 2048)
 }
 
 func (m *mkcert) fileNames(hosts []string) (certFile, keyFile, p12File string) {
@@ -182,15 +195,15 @@ func (m *mkcert) loadCA() {
 }
 
 func (m *mkcert) newCA() {
-	priv, err := rsa.GenerateKey(rand.Reader, 3072)
+	priv, err := m.generateKey(true)
 	fatalIfErr(err, "failed to generate the CA key")
-	pub := priv.PublicKey
+	pub := priv.(crypto.Signer).Public()
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	fatalIfErr(err, "failed to generate serial number")
 
-	spkiASN1, err := x509.MarshalPKIXPublicKey(&pub)
+	spkiASN1, err := x509.MarshalPKIXPublicKey(pub)
 	fatalIfErr(err, "failed to encode public key")
 
 	var spki struct {
@@ -225,7 +238,7 @@ func (m *mkcert) newCA() {
 		MaxPathLenZero:        true,
 	}
 
-	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, &pub, priv)
+	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, pub, priv)
 	fatalIfErr(err, "failed to generate CA certificate")
 
 	privDER, err := x509.MarshalPKCS8PrivateKey(priv)
