@@ -149,6 +149,9 @@ func (m *mkcert) fileNames(hosts []string) (certFile, keyFile, p12File string) {
 	if len(hosts) > 1 {
 		defaultName += "+" + strconv.Itoa(len(hosts)-1)
 	}
+	if m.client {
+		defaultName += "-client"
+	}
 
 	certFile = "./" + defaultName + ".pem"
 	if m.certFile != "" {
