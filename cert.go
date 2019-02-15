@@ -20,7 +20,6 @@ import (
 	"math/big"
 	"net"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"regexp"
@@ -38,8 +37,8 @@ func init() {
 	if u != nil {
 		userAndHostname = u.Username + "@"
 	}
-	out, _ := exec.Command("hostname").Output()
-	userAndHostname += strings.TrimSpace(string(out))
+	hostname, _ := os.Hostname()
+	userAndHostname += hostname
 }
 
 func (m *mkcert) makeCert(hosts []string) {
