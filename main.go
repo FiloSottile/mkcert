@@ -27,13 +27,13 @@ const shortUsage = `Usage of mkcert:
 	Install the local CA in the system trust store.
 
 	$ mkcert example.org
-	Generate "example.org.pem" and "example.org-key.pem".
+	Generate "example.org.crt" and "example.org.key".
 
 	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
-	Generate "example.com+4.pem" and "example.com+4-key.pem".
+	Generate "example.com+4.crt" and "example.com+4.key".
 
 	$ mkcert "*.example.it"
-	Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
+	Generate "_wildcard.example.it.crt" and "_wildcard.example.it.key".
 
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
@@ -121,8 +121,8 @@ func main() {
 	}).Run(flag.Args())
 }
 
-const rootName = "rootCA.pem"
-const rootKeyName = "rootCA-key.pem"
+const rootName = "rootCA.crt"
+const rootKeyName = "rootCA.key"
 
 type mkcert struct {
 	installMode, uninstallMode bool
