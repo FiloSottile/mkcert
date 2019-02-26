@@ -35,7 +35,11 @@ var userAndHostname string
 func init() {
 	u, _ := user.Current()
 	if u != nil {
-		userAndHostname = u.Name + "@"
+		var username = u.Name
+		if username == "" {
+			username = u.Username
+		}
+		userAndHostname = username + "@"
 	}
 	hostname, _ := os.Hostname()
 	userAndHostname += hostname
