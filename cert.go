@@ -19,6 +19,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"net/mail"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -61,18 +62,26 @@ func (m *mkcert) makeCert(hosts []string) {
 		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
 	}
+
 	for _, h := range hosts {
 		if ip := net.ParseIP(h); ip != nil {
 			tpl.IPAddresses = append(tpl.IPAddresses, ip)
+		} else if email, err := mail.ParseAddress(h); err == nil {
+			tpl.EmailAddresses = append(tpl.EmailAddresses, email.Address)
 		} else {
 			tpl.DNSNames = append(tpl.DNSNames, h)
 		}
 	}
+
 	if m.client {
 		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
+	} else if len(tpl.IPAddresses) > 0 || len(tpl.DNSNames) > 0 {
+		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
+	}
+	if len(tpl.EmailAddresses) > 0 {
+		tpl.ExtKeyUsage = append(tpl.ExtKeyUsage, x509.ExtKeyUsageCodeSigning, x509.ExtKeyUsageEmailProtection)
 	}
 
 	// IIS (the main target of PKCS #12 files), only shows the deprecated
