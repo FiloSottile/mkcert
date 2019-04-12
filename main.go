@@ -191,8 +191,7 @@ func (m *mkcert) Run(args []string) {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
 		}
-		if email, err := mail.ParseAddress(name); err == nil {
-			args[i] = email.Address
+		if email, err := mail.ParseAddress(name); err == nil && email.Address == name {
 			continue
 		}
 		punycode, err := idna.ToASCII(name)

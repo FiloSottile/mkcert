@@ -68,8 +68,8 @@ func (m *mkcert) makeCert(hosts []string) {
 	for _, h := range hosts {
 		if ip := net.ParseIP(h); ip != nil {
 			tpl.IPAddresses = append(tpl.IPAddresses, ip)
-		} else if email, err := mail.ParseAddress(h); err == nil {
-			tpl.EmailAddresses = append(tpl.EmailAddresses, email.Address)
+		} else if email, err := mail.ParseAddress(h); err == nil && email.Address == h {
+			tpl.EmailAddresses = append(tpl.EmailAddresses, h)
 		} else {
 			tpl.DNSNames = append(tpl.DNSNames, h)
 		}
