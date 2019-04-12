@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/mail"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -190,13 +191,16 @@ func (m *mkcert) Run(args []string) {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
 		}
+		if email, err := mail.ParseAddress(name); err == nil && email.Address == name {
+			continue
+		}
 		punycode, err := idna.ToASCII(name)
 		if err != nil {
-			log.Fatalf("ERROR: %q is not a valid hostname or IP: %s", name, err)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, or email: %s", name, err)
 		}
 		args[i] = punycode
 		if !hostnameRegexp.MatchString(punycode) {
-			log.Fatalf("ERROR: %q is not a valid hostname or IP", name)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, or email", name)
 		}
 	}
 
