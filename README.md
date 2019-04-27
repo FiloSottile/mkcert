@@ -142,6 +142,14 @@ To only install the local root CA into a subset of them, you can set the `TRUST_
 	    all other flags and arguments except -install and -cert-file.
 ```
 
+### S/MIME
+
+mkcert automatically generates an S/MIME certificate if one of the supplied names is an email address.
+
+```
+mkcert filippo@example.com
+```
+
 ### Mobile devices
 
 For the certificates to be trusted on mobile devices, you will have to install the root CA. It's the `rootCA.pem` file in the folder printed by `mkcert -CAROOT`.
