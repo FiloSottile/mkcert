@@ -18,7 +18,8 @@ var (
 
 func init() {
 	for _, path := range []string{
-		"/usr/bin/firefox", nssDB, "/Applications/Firefox.app",
+		"/usr/local/bin/firefox", "/usr/bin/firefox", nssDB,
+		"/Applications/Firefox.app",
 		"/Applications/Firefox Developer Edition.app",
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
@@ -43,6 +44,7 @@ func init() {
 		hasCertutil = err == nil
 
 	case "linux":
+	case "openbsd":
 		var err error
 		certutilPath, err = exec.LookPath("certutil")
 		hasCertutil = err == nil
