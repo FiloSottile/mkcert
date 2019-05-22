@@ -59,6 +59,8 @@ sudo apt install libnss3-tools
 sudo yum install nss-tools
     -or-
 sudo pacman -S nss
+    -or-
+sudo zypper install mozilla-nss-tools
 ```
 
 Then you can install using [Linuxbrew](http://linuxbrew.sh/)
@@ -111,7 +113,7 @@ mkcert supports the following root stores:
 * Windows system store
 * Linux variants that provide either
     * `update-ca-trust` (Fedora, RHEL, CentOS) or
-    * `update-ca-certificates` (Ubuntu, Debian) or
+    * `update-ca-certificates` (Ubuntu, Debian, OpenSUSE, SLES) or
     * `trust` (Arch)
 * Firefox (macOS and Linux only)
 * Chrome and Chromium
