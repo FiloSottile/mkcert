@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/mail"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -192,6 +193,9 @@ func (m *mkcert) Run(args []string) {
 			continue
 		}
 		if email, err := mail.ParseAddress(name); err == nil && email.Address == name {
+			continue
+		}
+		if _, err := url.Parse(name); err == nil {
 			continue
 		}
 		punycode, err := idna.ToASCII(name)

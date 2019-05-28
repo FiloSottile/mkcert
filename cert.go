@@ -20,6 +20,7 @@ import (
 	"math/big"
 	"net"
 	"net/mail"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -70,6 +71,8 @@ func (m *mkcert) makeCert(hosts []string) {
 			tpl.IPAddresses = append(tpl.IPAddresses, ip)
 		} else if email, err := mail.ParseAddress(h); err == nil && email.Address == h {
 			tpl.EmailAddresses = append(tpl.EmailAddresses, h)
+		} else if uriName, err := url.Parse(h); err == nil && uriName.Scheme != "" {
+			tpl.URIs = append(tpl.URIs, uriName)
 		} else {
 			tpl.DNSNames = append(tpl.DNSNames, h)
 		}
