@@ -46,22 +46,9 @@ func init() {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	}
-	if SystemTrustCommand != nil {
-		_, err := exec.LookPath(SystemTrustCommand[0])
-		if err != nil {
-			SystemTrustCommand = nil
-		}
+	if SystemTrustCommand != nil && !binaryExists(SystemTrustCommand[0]) {
+		SystemTrustCommand = nil
 	}
-}
-
-func pathExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func binaryExists(name string) bool {
-	_, err := exec.LookPath(name)
-	return err == nil
 }
 
 func (m *mkcert) systemTrustFilename() string {
@@ -115,7 +102,7 @@ func (m *mkcert) uninstallPlatform() bool {
 }
 
 func CommandWithSudo(cmd ...string) *exec.Cmd {
-	if _, err := exec.LookPath("sudo"); err != nil {
+	if !binaryExists("sudo") {
 		return exec.Command(cmd[0], cmd[1:]...)
 	}
 	return exec.Command("sudo", append([]string{"--"}, cmd...)...)

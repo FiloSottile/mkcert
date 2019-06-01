@@ -245,7 +245,7 @@ func (m *mkcert) makeCertFromCSR() {
 
 // loadCA will load or create the CA at CAROOT.
 func (m *mkcert) loadCA() {
-	if _, err := os.Stat(filepath.Join(m.CAROOT, rootName)); os.IsNotExist(err) {
+	if !pathExists(filepath.Join(m.CAROOT, rootName)) {
 		m.newCA()
 	} else {
 		log.Printf("Using the local CA at \"%s\" ✨\n", m.CAROOT)
@@ -260,7 +260,7 @@ func (m *mkcert) loadCA() {
 	m.caCert, err = x509.ParseCertificate(certDERBlock.Bytes)
 	fatalIfErr(err, "failed to parse the CA certificate")
 
-	if _, err := os.Stat(filepath.Join(m.CAROOT, rootKeyName)); os.IsNotExist(err) {
+	if !pathExists(filepath.Join(m.CAROOT, rootKeyName)) {
 		return // keyless mode, where only -install works
 	}
 

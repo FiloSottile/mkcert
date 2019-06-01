@@ -14,6 +14,7 @@ import (
 	"net"
 	"net/mail"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -329,4 +330,14 @@ func fatalIfCmdErr(err error, cmd string, out []byte) {
 	if err != nil {
 		log.Fatalf("ERROR: failed to execute \"%s\": %s\n\n%s\n", cmd, err, out)
 	}
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func binaryExists(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }

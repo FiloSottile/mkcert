@@ -39,19 +39,16 @@ func init() {
 		hasJava = true
 		javaHome = v
 
-		_, err := os.Stat(filepath.Join(v, keytoolPath))
-		if err == nil {
+		if pathExists(filepath.Join(v, keytoolPath)) {
 			hasKeytool = true
 			keytoolPath = filepath.Join(v, keytoolPath)
 		}
 
-		_, err = os.Stat(filepath.Join(v, "lib", "security", "cacerts"))
-		if err == nil {
+		if pathExists(filepath.Join(v, "lib", "security", "cacerts")) {
 			cacertsPath = filepath.Join(v, "lib", "security", "cacerts")
 		}
 
-		_, err = os.Stat(filepath.Join(v, "jre", "lib", "security", "cacerts"))
-		if err == nil {
+		if pathExists(filepath.Join(v, "jre", "lib", "security", "cacerts")) {
 			cacertsPath = filepath.Join(v, "jre", "lib", "security", "cacerts")
 		}
 	}

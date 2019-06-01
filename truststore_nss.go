@@ -23,29 +23,25 @@ func init() {
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
 	} {
-		_, err := os.Stat(path)
-		hasNSS = hasNSS || err == nil
+		hasNSS = hasNSS || pathExists(path)
 	}
 
 	switch runtime.GOOS {
 	case "darwin":
-		var err error
-		certutilPath, err = exec.LookPath("certutil")
-		if err != nil {
-			var out []byte
-			out, err = exec.Command("brew", "--prefix", "nss").Output()
-			if err != nil {
-				return
+		if hasCertutil = binaryExists("certutil"); hasCertutil {
+			certutilPath, _ = exec.LookPath("certutil")
+		} else {
+			out, err := exec.Command("brew", "--prefix", "nss").Output()
+			if err == nil {
+				certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
+				hasCertutil = pathExists(certutilPath)
 			}
-			certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
-			_, err = os.Stat(certutilPath)
 		}
-		hasCertutil = err == nil
 
 	case "linux":
-		var err error
-		certutilPath, err = exec.LookPath("certutil")
-		hasCertutil = err == nil
+		if hasCertutil = binaryExists("certutil"); hasCertutil {
+			certutilPath, _ = exec.LookPath("certutil")
+		}
 	}
 }
 
@@ -96,7 +92,7 @@ func (m *mkcert) uninstallNSS() {
 
 func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 	profiles, _ := filepath.Glob(FirefoxProfile)
-	if _, err := os.Stat(nssDB); err == nil {
+	if pathExists(nssDB) {
 		profiles = append(profiles, nssDB)
 	}
 	if len(profiles) == 0 {
@@ -106,12 +102,10 @@ func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 		if stat, err := os.Stat(profile); err != nil || !stat.IsDir() {
 			continue
 		}
-		if _, err := os.Stat(filepath.Join(profile, "cert9.db")); err == nil {
+		if pathExists(filepath.Join(profile, "cert9.db")) {
 			f("sql:" + profile)
 			found++
-			continue
-		}
-		if _, err := os.Stat(filepath.Join(profile, "cert8.db")); err == nil {
+		} else if pathExists(filepath.Join(profile, "cert8.db")) {
 			f("dbm:" + profile)
 			found++
 		}
