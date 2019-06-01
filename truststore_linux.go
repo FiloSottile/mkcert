@@ -16,15 +16,23 @@ import (
 )
 
 var (
-	FirefoxProfile      = os.Getenv("HOME") + "/.mozilla/firefox/*"
-	CertutilInstallHelp = `apt install libnss3-tools" or "yum install nss-tools" or "zypper install mozilla-nss-tools`
-	NSSBrowsers         = "Firefox and/or Chrome/Chromium"
+	FirefoxProfile = os.Getenv("HOME") + "/.mozilla/firefox/*"
+	NSSBrowsers    = "Firefox and/or Chrome/Chromium"
 
 	SystemTrustFilename string
 	SystemTrustCommand  []string
+	CertutilInstallHelp string
 )
 
 func init() {
+	switch {
+	case binaryExists("apt"):
+		CertutilInstallHelp = "apt install libnss3-tools"
+	case binaryExists("yum"):
+		CertutilInstallHelp = "yum install nss-tools"
+	case binaryExists("zypper"):
+		CertutilInstallHelp = "zypper install mozilla-nss-tools"
+	}
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
@@ -48,6 +56,11 @@ func init() {
 
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
+	return err == nil
+}
+
+func binaryExists(name string) bool {
+	_, err := exec.LookPath(name)
 	return err == nil
 }
 
