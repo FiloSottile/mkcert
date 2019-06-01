@@ -17,7 +17,7 @@ import (
 
 var (
 	FirefoxProfile      = os.Getenv("HOME") + "/.mozilla/firefox/*"
-	CertutilInstallHelp = `apt install libnss3-tools" or "yum install nss-tools`
+	CertutilInstallHelp = `apt install libnss3-tools" or "yum install nss-tools" or "zypper install mozilla-nss-tools`
 	NSSBrowsers         = "Firefox and/or Chrome/Chromium"
 
 	SystemTrustFilename string
@@ -34,6 +34,9 @@ func init() {
 	} else if pathExists("/etc/ca-certificates/trust-source/anchors/") {
 		SystemTrustFilename = "/etc/ca-certificates/trust-source/anchors/%s.crt"
 		SystemTrustCommand = []string{"trust", "extract-compat"}
+	} else if pathExists("/usr/share/pki/trust/anchors") {
+		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
+		SystemTrustCommand = []string{"update-ca-certificates"}
 	}
 	if SystemTrustCommand != nil {
 		_, err := exec.LookPath(SystemTrustCommand[0])
