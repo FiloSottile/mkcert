@@ -17,17 +17,26 @@ var (
 	hasNSS       bool
 	hasCertutil  bool
 	certutilPath string
-	nssDB        = filepath.Join(os.Getenv("HOME"), ".pki/nssdb")
-)
-
-func init() {
-	for _, path := range []string{
-		"/usr/bin/firefox", nssDB, "/Applications/Firefox.app",
+	nssDBs       = []string{
+		filepath.Join(os.Getenv("HOME"), ".pki/nssdb"),
+		filepath.Join(os.Getenv("HOME"), "snap/chromium/current/.pki/nssdb"), // Snapcraft
+		"/etc/pki/nssdb", // CentOS 7
+	}
+	firefoxPaths = []string{
+		"/usr/bin/firefox", "/Applications/Firefox.app",
 		"/Applications/Firefox Developer Edition.app",
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
-	} {
-		hasNSS = hasNSS || pathExists(path)
+	}
+)
+
+func init() {
+	allPaths := append(append([]string{}, nssDBs...), firefoxPaths...)
+	for _, path := range allPaths {
+		if pathExists(path) {
+			hasNSS = true
+			break
+		}
 	}
 
 	switch runtime.GOOS {
@@ -96,12 +105,7 @@ func (m *mkcert) uninstallNSS() {
 
 func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 	profiles, _ := filepath.Glob(FirefoxProfile)
-	if pathExists(nssDB) {
-		profiles = append(profiles, nssDB)
-	}
-	if len(profiles) == 0 {
-		return
-	}
+	profiles = append(profiles, nssDBs...)
 	for _, profile := range profiles {
 		if stat, err := os.Stat(profile); err != nil || !stat.IsDir() {
 			continue
