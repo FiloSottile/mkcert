@@ -34,12 +34,16 @@ import (
 var userAndHostname string
 
 func init() {
-	u, _ := user.Current()
-	if u != nil {
+	u, err := user.Current()
+	if err == nil {
 		userAndHostname = u.Username + "@"
 	}
-	hostname, _ := os.Hostname()
-	userAndHostname += hostname
+	if h, err := os.Hostname(); err == nil {
+		userAndHostname += h
+	}
+	if err == nil && u.Name != "" && u.Name != u.Username {
+		userAndHostname += " (" + u.Name + ")"
+	}
 }
 
 func (m *mkcert) makeCert(hosts []string) {
