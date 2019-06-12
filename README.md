@@ -73,7 +73,7 @@ or build from source (requires Go 1.10+)
 
 ```
 go get -u github.com/FiloSottile/mkcert
-$(go env GOPATH)/bin/mkcert
+$(go env GOBIN)/mkcert
 ```
 
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
