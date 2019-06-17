@@ -195,16 +195,16 @@ func (m *mkcert) Run(args []string) {
 		if email, err := mail.ParseAddress(name); err == nil && email.Address == name {
 			continue
 		}
-		if _, err := url.Parse(name); err == nil {
+		if uriName, err := url.Parse(name); err == nil && uriName.Scheme == "spiffe" {
 			continue
 		}
 		punycode, err := idna.ToASCII(name)
 		if err != nil {
-			log.Fatalf("ERROR: %q is not a valid hostname, IP, or email: %s", name, err)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, spiffe URI or email: %s", name, err)
 		}
 		args[i] = punycode
 		if !hostnameRegexp.MatchString(punycode) {
-			log.Fatalf("ERROR: %q is not a valid hostname, IP, or email", name)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, spiffe URI or email", name)
 		}
 	}
 
