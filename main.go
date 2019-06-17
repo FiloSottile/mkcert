@@ -200,7 +200,7 @@ func (m *mkcert) Run(args []string) {
 		}
 		punycode, err := idna.ToASCII(name)
 		if err != nil {
-			log.Fatalf("ERROR: %q is not a valid hostname, IP, spiffe URI or email: %s", name, err)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, URL or email: %s", name, err)
 		}
 		args[i] = punycode
 		if !hostnameRegexp.MatchString(punycode) {
