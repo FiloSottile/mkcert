@@ -79,7 +79,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	}
 
 	if m.client {
-		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth}
+		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
 	} else if len(tpl.IPAddresses) > 0 || len(tpl.DNSNames) > 0 {
 		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	}
