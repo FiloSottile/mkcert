@@ -195,7 +195,7 @@ func (m *mkcert) Run(args []string) {
 		if email, err := mail.ParseAddress(name); err == nil && email.Address == name {
 			continue
 		}
-		if uriName, err := url.Parse(name); err == nil && uriName.Scheme == "spiffe" {
+		if uriName, err := url.Parse(name); err == nil && uriName.Scheme != "" && uriName.Host != "" {
 			continue
 		}
 		punycode, err := idna.ToASCII(name)
