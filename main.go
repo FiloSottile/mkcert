@@ -204,7 +204,7 @@ func (m *mkcert) Run(args []string) {
 		}
 		args[i] = punycode
 		if !hostnameRegexp.MatchString(punycode) {
-			log.Fatalf("ERROR: %q is not a valid hostname, IP, spiffe URI or email", name)
+			log.Fatalf("ERROR: %q is not a valid hostname, IP, URL or email", name)
 		}
 	}
 
