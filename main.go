@@ -92,13 +92,13 @@ func main() {
 		p12FileFlag   = flag.String("p12-file", "", "")
 	)
 	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(), shortUsage)
+		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
 		fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
 	}
 	flag.Parse()
 	if *helpFlag {
-		fmt.Fprintf(flag.CommandLine.Output(), shortUsage)
-		fmt.Fprintf(flag.CommandLine.Output(), advancedUsage)
+		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
+		fmt.Fprint(flag.CommandLine.Output(), advancedUsage)
 		return
 	}
 	if *carootFlag {

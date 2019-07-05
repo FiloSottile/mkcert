@@ -1,10 +1,11 @@
 language: go
 sudo: false
 go: stable
-install: "# skip"
+install: (cd && go get honnef.co/go/tools/cmd/staticcheck)
 
 script:
   - go vet
+  - staticcheck ./...
   - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-linux-amd64"
   - CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -o "mkcert-$(git describe --tags)-linux-arm"
   - CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64"
