@@ -1,7 +1,7 @@
 language: go
 sudo: false
 go: stable
-install: go get honnef.co/go/tools/cmd/staticcheck
+install: cd && go get honnef.co/go/tools/cmd/staticcheck
 
 script:
   - go vet
