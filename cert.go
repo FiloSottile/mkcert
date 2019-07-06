@@ -64,7 +64,13 @@ func (m *mkcert) makeCert(hosts []string) {
 		},
 
 		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now(),
+
+		// Fix the notBefore to temporarily bypass macOS Catalina's limit on
+		// certificate lifespan. Once mkcert provides an ACME server, automation
+		// will be the recommended way to guarantee uninterrupted functionality,
+		// and the lifespan will be shortened to 825 days. See issue 174 and
+		// https://support.apple.com/en-us/HT210176.
+		NotBefore: time.Date(2019, time.June, 1, 0, 0, 0, 0, time.UTC),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		BasicConstraintsValid: true,
