@@ -67,7 +67,7 @@ Then you can install using [Linuxbrew](http://linuxbrew.sh/)
 
 ```
 brew install mkcert
-````
+```
 
 or build from source (requires Go 1.10+)
 
