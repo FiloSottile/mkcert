@@ -88,7 +88,7 @@ makepkg -si
 
 ### Windows
 
-On Windows, use Chocolatey
+On Windows, use [Chocolatey](https://chocolatey.org)
 
 ```
 choco install mkcert
