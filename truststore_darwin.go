@@ -62,7 +62,7 @@ func (m *mkcert) installPlatform() bool {
 	fatalIfErr(err, "failed to create temp file")
 	defer os.Remove(plistFile.Name())
 
-	cmd = exec.Command("sudo", "security", "trust-settings-export", "-d", plistFile.Name())
+	cmd = exec.Command("security", "trust-settings-export", "-d", plistFile.Name())
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-export", out)
 
@@ -96,7 +96,7 @@ func (m *mkcert) installPlatform() bool {
 	err = ioutil.WriteFile(plistFile.Name(), plistData, 0600)
 	fatalIfErr(err, "failed to write trust settings")
 
-	cmd = exec.Command("sudo", "security", "trust-settings-import", "-d", plistFile.Name())
+	cmd = exec.Command("security", "trust-settings-import", "-d", plistFile.Name())
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-import", out)
 
@@ -104,7 +104,7 @@ func (m *mkcert) installPlatform() bool {
 }
 
 func (m *mkcert) uninstallPlatform() bool {
-	cmd := exec.Command("sudo", "security", "remove-trusted-cert", "-d", filepath.Join(m.CAROOT, rootName))
+	cmd := exec.Command("security", "remove-trusted-cert", "-d", filepath.Join(m.CAROOT, rootName))
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security remove-trusted-cert", out)
 
