@@ -28,6 +28,8 @@ Using certificates from real certificate authorities (CAs) for development can b
 
 mkcert automatically creates and installs a local CA in the system root store, and generates locally-trusted certificates. mkcert does not automatically configure servers to use the certificates, though, that's up to you.
 
+Note that the `-install` command requires administrative privileges so you may be prompted for your password via `sudo` on Unixy sytems.
+
 ## Installation
 
 > **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
