@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -65,12 +64,12 @@ func (m *mkcert) installPlatform() bool {
 	cert, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read root certificate")
 
-	cmd := CommandWithSudo("tee", m.systemTrustFilename())
+	cmd := commandWithSudo("tee", m.systemTrustFilename())
 	cmd.Stdin = bytes.NewReader(cert)
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "tee", out)
 
-	cmd = CommandWithSudo(SystemTrustCommand...)
+	cmd = commandWithSudo(SystemTrustCommand...)
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, strings.Join(SystemTrustCommand, " "), out)
 
@@ -82,28 +81,21 @@ func (m *mkcert) uninstallPlatform() bool {
 		return false
 	}
 
-	cmd := CommandWithSudo("rm", "-f", m.systemTrustFilename())
+	cmd := commandWithSudo("rm", "-f", m.systemTrustFilename())
 	out, err := cmd.CombinedOutput()
 	fatalIfCmdErr(err, "rm", out)
 
 	// We used to install under non-unique filenames.
 	legacyFilename := fmt.Sprintf(SystemTrustFilename, "mkcert-rootCA")
 	if pathExists(legacyFilename) {
-		cmd := CommandWithSudo("rm", "-f", legacyFilename)
+		cmd := commandWithSudo("rm", "-f", legacyFilename)
 		out, err := cmd.CombinedOutput()
 		fatalIfCmdErr(err, "rm (legacy filename)", out)
 	}
 
-	cmd = CommandWithSudo(SystemTrustCommand...)
+	cmd = commandWithSudo(SystemTrustCommand...)
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, strings.Join(SystemTrustCommand, " "), out)
 
 	return true
-}
-
-func CommandWithSudo(cmd ...string) *exec.Cmd {
-	if !binaryExists("sudo") {
-		return exec.Command(cmd[0], cmd[1:]...)
-	}
-	return exec.Command("sudo", append([]string{"--"}, cmd...)...)
 }

@@ -106,12 +106,12 @@ func (m *mkcert) uninstallJava() {
 }
 
 // execKeytool will execute a "keytool" command and if needed re-execute
-// the command wrapped in 'sudo' to work around file permissions.
+// the command with commandWithSudo to work around file permissions.
 func (m *mkcert) execKeytool(cmd *exec.Cmd) ([]byte, error) {
 	out, err := cmd.CombinedOutput()
 	if err != nil && bytes.Contains(out, []byte("java.io.FileNotFoundException")) && runtime.GOOS != "windows" {
 		origArgs := cmd.Args[1:]
-		cmd = exec.Command("sudo", keytoolPath)
+		cmd = commandWithSudo(keytoolPath)
 		cmd.Args = append(cmd.Args, origArgs...)
 		cmd.Env = []string{
 			"JAVA_HOME=" + javaHome,
