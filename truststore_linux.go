@@ -45,9 +45,6 @@ func init() {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	}
-	if SystemTrustCommand != nil && !binaryExists(SystemTrustCommand[0]) {
-		SystemTrustCommand = nil
-	}
 }
 
 func (m *mkcert) systemTrustFilename() string {
