@@ -242,37 +242,43 @@ func getCAROOT() string {
 }
 
 func (m *mkcert) install() {
-	var printed bool
-	if storeEnabled("system") && !m.checkPlatform() {
-		if m.installPlatform() {
-			log.Print("The local CA is now installed in the system trust store! ⚡️")
-		}
-		m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
-		printed = true
-	}
-	if storeEnabled("nss") && hasNSS && !m.checkNSS() {
-		if hasCertutil && m.installNSS() {
-			log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
-		} else if CertutilInstallHelp == "" {
-			log.Printf(`Note: %s support is not available on your platform. ℹ️`, NSSBrowsers)
-		} else if !hasCertutil {
-			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
-			log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
-		}
-		printed = true
-	}
-	if storeEnabled("java") && hasJava && !m.checkJava() {
-		if hasKeytool {
-			m.installJava()
-			log.Println("The local CA is now installed in Java's trust store! ☕️")
+	if storeEnabled("system") {
+		if m.checkPlatform() {
+			log.Print("The local CA is already installed in the system trust store! 👍")
 		} else {
-			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java's trust store! ⚠️`)
+			if m.installPlatform() {
+				log.Print("The local CA is now installed in the system trust store! ⚡️")
+			}
+			m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
 		}
-		printed = true
 	}
-	if printed {
-		log.Print("")
+	if storeEnabled("nss") && hasNSS {
+		if m.checkNSS() {
+			log.Printf("The local CA is already installed in the %s trust store! 👍", NSSBrowsers)
+		} else {
+			if hasCertutil && m.installNSS() {
+				log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
+			} else if CertutilInstallHelp == "" {
+				log.Printf(`Note: %s support is not available on your platform. ℹ️`, NSSBrowsers)
+			} else if !hasCertutil {
+				log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
+				log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
+			}
+		}
 	}
+	if storeEnabled("java") && hasJava {
+		if m.checkJava() {
+			log.Println("The local CA is already installed in Java's trust store! 👍")
+		} else {
+			if hasKeytool {
+				m.installJava()
+				log.Println("The local CA is now installed in Java's trust store! ☕️")
+			} else {
+				log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java's trust store! ⚠️`)
+			}
+		}
+	}
+	log.Print("")
 }
 
 func (m *mkcert) uninstall() {
