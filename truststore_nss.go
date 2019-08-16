@@ -41,9 +41,15 @@ func init() {
 
 	switch runtime.GOOS {
 	case "darwin":
-		if hasCertutil = binaryExists("certutil"); hasCertutil {
+		switch {
+		case binaryExists("certutil"):
 			certutilPath, _ = exec.LookPath("certutil")
-		} else {
+			hasCertutil = true
+		case binaryExists("/usr/local/opt/nss/bin/certutil"):
+			// Check the default Homebrew path, to save executing Ruby. #135
+			certutilPath = "/usr/local/opt/nss/bin/certutil"
+			hasCertutil = true
+		default:
 			out, err := exec.Command("brew", "--prefix", "nss").Output()
 			if err == nil {
 				certutilPath = filepath.Join(strings.TrimSpace(string(out)), "bin", "certutil")
