@@ -1,5 +1,7 @@
 # golang.org/x/net v0.0.0-20180627171509-e514e69ffb8b
 golang.org/x/net/idna
+# golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
+golang.org/x/sys/unix
 # golang.org/x/text v0.3.0
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
