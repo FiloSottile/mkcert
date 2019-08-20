@@ -5,6 +5,7 @@
 package main
 
 import (
+	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"os/exec"
@@ -69,7 +70,7 @@ func (m *mkcert) checkNSS() bool {
 		return false
 	}
 	success := true
-	if m.forEachNSSProfile(func(profile string) {
+	if m.forEachNSSProfile(func(profile string, path string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			success = false
@@ -81,12 +82,16 @@ func (m *mkcert) checkNSS() bool {
 }
 
 func (m *mkcert) installNSS() bool {
-	if m.forEachNSSProfile(func(profile string) {
+	if m.forEachNSSProfile(func(profile string, path string) {
 		// certutil must be sudoed on Ubuntu 16.04
-		cmdArgs := []string{ certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName)}
-		//cmd := commandWithSudo(cmdArgs...)
+		cmdArgs := []string{certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName)}
 		cmd := exec.Command(certutilPath, cmdArgs[1:]...)
 
+		if runtime.GOOS == "linux" {
+			if err := unix.Access(path, unix.W_OK); err != nil {
+				cmd = commandWithSudo(cmdArgs...)
+			}
+		}
 		out, err := cmd.CombinedOutput()
 		fatalIfCmdErr(err, strings.Join(cmdArgs, " "), out)
 	}) == 0 {
@@ -102,18 +107,27 @@ func (m *mkcert) installNSS() bool {
 }
 
 func (m *mkcert) uninstallNSS() {
-	m.forEachNSSProfile(func(profile string) {
+	m.forEachNSSProfile(func(profile string, path string) {
 		err := exec.Command(certutilPath, "-V", "-d", profile, "-u", "L", "-n", m.caUniqueName()).Run()
 		if err != nil {
 			return
 		}
-		cmd := exec.Command(certutilPath, "-D", "-d", profile, "-n", m.caUniqueName())
+
+		cmdArgs := []string{certutilPath, "-D", "-d", profile, "-n", m.caUniqueName()}
+		cmd := exec.Command(certutilPath, cmdArgs[1:]...)
+		if runtime.GOOS == "linux" {
+			if err := unix.Access(path, unix.W_OK); err != nil {
+				cmd = commandWithSudo(cmdArgs...)
+			}
+		}
+
 		out, err := cmd.CombinedOutput()
-		fatalIfCmdErr(err, "certutil -D", out)
+
+		fatalIfCmdErr(err, strings.Join(cmdArgs, " "), out)
 	})
 }
 
-func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
+func (m *mkcert) forEachNSSProfile(f func(profile string, path string)) (found int) {
 	profiles, _ := filepath.Glob(FirefoxProfile)
 	profiles = append(profiles, nssDBs...)
 	for _, profile := range profiles {
@@ -121,10 +135,10 @@ func (m *mkcert) forEachNSSProfile(f func(profile string)) (found int) {
 			continue
 		}
 		if pathExists(filepath.Join(profile, "cert9.db")) {
-			f("sql:" + profile)
+			f("sql:"+profile, profile)
 			found++
 		} else if pathExists(filepath.Join(profile, "cert8.db")) {
-			f("dbm:" + profile)
+			f("dbm:"+profile, profile)
 			found++
 		}
 	}
