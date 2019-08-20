@@ -1,6 +1,6 @@
-package main
+// +build linux darwin !windows
 
-// +build !windows
+package main
 
 import (
 	"golang.org/x/sys/unix"

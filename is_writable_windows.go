@@ -1,3 +1,5 @@
+// +build windows
+
 package main
 
 import (
@@ -6,7 +8,6 @@ import (
 
 // thanks to https://stackoverflow.com/a/49148866/215713
 func IsWritable(path string) bool {
-	isWritable = false
 	info, err := os.Stat(path)
 	if err != nil {
 		return false
