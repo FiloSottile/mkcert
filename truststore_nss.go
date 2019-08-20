@@ -5,7 +5,6 @@
 package main
 
 import (
-	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"os/exec"
@@ -87,10 +86,8 @@ func (m *mkcert) installNSS() bool {
 		cmdArgs := []string{certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName)}
 		cmd := exec.Command(certutilPath, cmdArgs[1:]...)
 
-		if runtime.GOOS == "linux" {
-			if err := unix.Access(path, unix.W_OK); err != nil {
-				cmd = commandWithSudo(cmdArgs...)
-			}
+		if !IsWritable(path) {
+			cmd = commandWithSudo(cmdArgs...)
 		}
 		out, err := cmd.CombinedOutput()
 		fatalIfCmdErr(err, strings.Join(cmdArgs, " "), out)
@@ -115,10 +112,8 @@ func (m *mkcert) uninstallNSS() {
 
 		cmdArgs := []string{certutilPath, "-D", "-d", profile, "-n", m.caUniqueName()}
 		cmd := exec.Command(certutilPath, cmdArgs[1:]...)
-		if runtime.GOOS == "linux" {
-			if err := unix.Access(path, unix.W_OK); err != nil {
-				cmd = commandWithSudo(cmdArgs...)
-			}
+		if !IsWritable(path) {
+			cmd = commandWithSudo(cmdArgs...)
 		}
 
 		out, err := cmd.CombinedOutput()
