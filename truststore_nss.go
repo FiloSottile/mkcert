@@ -82,7 +82,8 @@ func (m *mkcert) checkNSS() bool {
 
 func (m *mkcert) installNSS() bool {
 	if m.forEachNSSProfile(func(profile string) {
-		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
+		// certutil must be sudoed on Ubuntu 16.04
+		cmd := commandWithSudo(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
 		out, err := cmd.CombinedOutput()
 		fatalIfCmdErr(err, "certutil -A", out)
 	}) == 0 {
