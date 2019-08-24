@@ -28,6 +28,16 @@ Using certificates from real certificate authorities (CAs) for development can b
 
 mkcert automatically creates and installs a local CA in the system root store, and generates locally-trusted certificates. mkcert does not automatically configure servers to use the certificates, though, that's up to you.
 
+## Quickstart
+
+If you have Go 1.12+ just run the following command to get a valid certificate for `example.com` and its subdomains.
+
+```
+go run github.com/FiloSottile/mkcert -install example.com "*.example.com"
+```
+
+Otherwise, the installation instructions below don't require Go.
+
 ## Installation
 
 > **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
