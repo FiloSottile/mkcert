@@ -143,7 +143,6 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
-	version                    string
 
 	CAROOT string
 	caCert *x509.Certificate
