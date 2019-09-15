@@ -6,7 +6,7 @@ $(shell cd $(PROJDIR))
 PKG := github.com/nbenaglia/mkcert
 
 OUT      := mkcert
-VERSION  := $(shell git describe --always --long --dirty)
+VERSION  := $(shell git describe --tags)
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/)
 LD_FLAGS := "-w -X main.Version=$(VERSION)"
