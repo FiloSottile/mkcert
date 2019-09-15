@@ -43,6 +43,9 @@ const shortUsage = `Usage of mkcert:
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
+	$ mkcert -version
+	Show the version information.
+
 `
 
 const advancedUsage = `Advanced options:
@@ -88,11 +91,13 @@ func main() {
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
+		versionFlag   = flag.Bool("version", false, "")
 		csrFlag       = flag.String("csr", "", "")
 		certFileFlag  = flag.String("cert-file", "", "")
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 	)
+
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
 		fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
@@ -119,6 +124,10 @@ func main() {
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
+	if *versionFlag {
+		log.Println(Version)
+		return
+	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
@@ -134,6 +143,7 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
+	version                    string
 
 	CAROOT string
 	caCert *x509.Certificate
@@ -368,3 +378,4 @@ func commandWithSudo(cmd ...string) *exec.Cmd {
 	}
 	return exec.Command("sudo", append([]string{"--prompt=Sudo password:", "--"}, cmd...)...)
 }
+

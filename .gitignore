@@ -1,0 +1,5 @@
+# IntelliJ IDE
+.idea/
+
+# The binary
+/mkcert
