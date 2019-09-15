@@ -1,4 +1,4 @@
-module github.com/nbenaglia/mkcert
+module github.com/FiloSottile/mkcert
 
 require (
 	golang.org/x/net v0.0.0-20180627171509-e514e69ffb8b
