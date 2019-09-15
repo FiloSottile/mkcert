@@ -78,7 +78,8 @@ func TestMkcert_Run(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, fmt.Sprintf("OK: /%d\n", randomURI), string(body))
 
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelFunc()
 	err = server.Shutdown(ctx)
 	assert.NoError(t, err)
 }
