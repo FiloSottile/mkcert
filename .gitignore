@@ -2,4 +2,4 @@
 .idea/
 
 # The binary
-/mkcert
+/mkcert*
