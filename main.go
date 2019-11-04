@@ -190,7 +190,10 @@ func (m *mkcert) Run(args []string) {
 		return
 	}
 
-	hostnameRegexp := regexp.MustCompile(`(?i)^(\*\.)?[0-9a-z_-]([0-9a-z._-]*[0-9a-z_-])?$`)
+	hostnameRegexp, err := regexp.Compile(`(?i)^(\*\.)?[0-9a-z_-]([0-9a-z._-]*[0-9a-z_-])?$`)
+	if err != nil {
+		log.Fatalf("Error: Regex failed to compile - %s", err)
+	}
 	for i, name := range args {
 		if ip := net.ParseIP(name); ip != nil {
 			continue
