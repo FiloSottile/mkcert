@@ -137,7 +137,7 @@ func (m *mkcert) makeCert(hosts []string) {
 }
 
 func (m *mkcert) printHosts(hosts []string) {
-	secondLvlWildcardRegexp, err = regexp.Compile(`(?i)^\*\.[0-9a-z_-]+$`)
+	secondLvlWildcardRegexp, err := regexp.Compile(`(?i)^\*\.[0-9a-z_-]+$`)
 	if err != nil {
 		log.Fatalf("Error: Regex failed to compile - %s", err)
 	}
