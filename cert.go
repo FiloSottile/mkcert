@@ -33,8 +33,10 @@ import (
 )
 
 var userAndHostname string
+var secondLvlWildcardRegexp *regexp.Regexp
 
 func init() {
+	secondLvlWildcardRegexp = regexp.MustCompile(`(?i)^\*\.[0-9a-z_-]+$`)
 	u, err := user.Current()
 	if err == nil {
 		userAndHostname = u.Username + "@"
@@ -137,10 +139,6 @@ func (m *mkcert) makeCert(hosts []string) {
 }
 
 func (m *mkcert) printHosts(hosts []string) {
-	secondLvlWildcardRegexp, err := regexp.Compile(`(?i)^\*\.[0-9a-z_-]+$`)
-	if err != nil {
-		log.Fatalf("Error: Regex failed to compile - %s", err)
-	}
 	log.Printf("\nCreated a new certificate valid for the following names 📜")
 	for _, h := range hosts {
 		log.Printf(" - %q", h)
