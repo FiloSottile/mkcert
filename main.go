@@ -78,6 +78,9 @@ const advancedUsage = `Advanced options:
 
 `
 
+// Version is set more precisely at build time.
+var Version = "v1.4.0-dev"
+
 func main() {
 	log.SetFlags(0)
 	var (
@@ -92,6 +95,7 @@ func main() {
 		certFileFlag  = flag.String("cert-file", "", "")
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
+		versionFlag   = flag.Bool("version", false, "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -101,6 +105,10 @@ func main() {
 	if *helpFlag {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
 		fmt.Fprint(flag.CommandLine.Output(), advancedUsage)
+		return
+	}
+	if *versionFlag {
+		fmt.Println(Version)
 		return
 	}
 	if *carootFlag {
