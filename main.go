@@ -79,7 +79,7 @@ const advancedUsage = `Advanced options:
 `
 
 // Version is set more precisely at build time.
-var Version = "v1.4.0-dev"
+var Version = "v1.4.1-dev"
 
 func main() {
 	log.SetFlags(0)
