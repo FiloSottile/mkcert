@@ -3,13 +3,13 @@ go: stable
 
 script:
   - go run analysis.go ./...
-  - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-linux-amd64" \
+  - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-linux-amd64"
         -ldflags "-X main.Version=$(git describe --tags)"
-  - CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -o "mkcert-$(git describe --tags)-linux-arm" \
+  - CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -o "mkcert-$(git describe --tags)-linux-arm"
         -ldflags "-X main.Version=$(git describe --tags)"
-  - CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64" \
+  - CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64"
         -ldflags "-X main.Version=$(git describe --tags)"
-  - CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-windows-amd64.exe" \
+  - CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-windows-amd64.exe"
         -ldflags "-X main.Version=$(git describe --tags)"
 
 deploy:
