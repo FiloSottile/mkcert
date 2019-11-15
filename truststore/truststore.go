@@ -9,11 +9,15 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"runtime"
 	"sync"
 )
 
-// Installer installs a certificate to the system truststore.
-type Installer struct{}
+// Truststore installs, uninstalls, & enumerates certificates on the store.
+type Truststore interface {
+	// Install installs the PEM-encoded certificate at path.
+	Install(path string) error
+}
 
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
@@ -44,4 +48,17 @@ func decodeCert(path string) (*x509.Certificate, error) {
 	}
 	b, _ := pem.Decode(d)
 	return x509.ParseCertificate(b.Bytes)
+}
+
+func firefoxProfile() string {
+	switch runtime.GOOS {
+	case "darwin":
+		return os.Getenv("HOME") + "/Library/Application Support/Firefox/Profiles/*"
+	case "linux":
+		return os.Getenv("HOME") + "/.mozilla/firefox/*"
+	case "windows":
+		return os.Getenv("USERPROFILE") + "\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles"
+	}
+
+	return ""
 }

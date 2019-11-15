@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+type linuxStore struct{}
+
+// Platform returns the truststore for the current platform.
+func Platform() (Truststore, error) {
+	return &linuxStore{}, nil
+}
+
 // installCommand describes the command necessary to install
 // a root certificate on the current platform.
 type installCommand struct {
@@ -43,7 +50,7 @@ func installStrategy() (installCommand, error) {
 
 // Install installs the pem-encoded root certificate at the provided path
 // to the system store.
-func (i *Installer) Install(path string) error {
+func (i *linuxStore) Install(path string) error {
 	pemData, err := ioutil.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("failed to read root certificate: %v", err)
@@ -62,14 +69,14 @@ func (i *Installer) Install(path string) error {
 		return err
 	}
 	cmd.Stdin = bytes.NewReader(pemData)
-  if _, err := cmd.CombinedOutput(); err != nil {
+	if _, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("command %q failed: %v", "tee", err)
 	}
 
 	cmd, err = commandWithSudo(strategy.command...)
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 	if _, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("command %q failed: %v", strings.Join(strategy.command, " "), err)
 	}

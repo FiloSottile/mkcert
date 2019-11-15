@@ -38,6 +38,13 @@ var trustSettingsData = []byte(`
 </array>
 `)
 
+type darwinStore struct{}
+
+// Platform returns the truststore for the current platform.
+func Platform() (Truststore, error) {
+	return &darwinStore{}, nil
+}
+
 func platformTrustSettings() (map[string]interface{}, error) {
 	plistFile, err := ioutil.TempFile("", "trust-settings")
 	if err != nil {
@@ -95,7 +102,7 @@ func updatePlatformTrustSettings(root map[string]interface{}) error {
 
 // Install installs the pem-encoded root certificate at the provided path
 // to the system store.
-func (i *Installer) Install(path string) error {
+func (i *darwinStore) Install(path string) error {
 	cert, err := decodeCert(path)
 	if err != nil {
 		return err
