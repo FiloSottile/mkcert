@@ -95,7 +95,7 @@ func updatePlatformTrustSettings(root map[string]interface{}) error {
 		return err
 	}
 	if _, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("command %q failed: %v", "trust-settings-import", err)
+		return fmt.Errorf("command %q failed: %v", "security trust-settings-import", err)
 	}
 	return nil
 }
@@ -138,4 +138,16 @@ func (i *darwinStore) Install(path string) error {
 		break
 	}
 	return updatePlatformTrustSettings(plistRoot)
+}
+
+// Uninstall removes the PEM-encoded certificate at path from the system store.
+func (i *darwinStore) Uninstall(path string) error {
+	cmd, err := commandWithSudo("security", "remove-trusted-cert", "-d", path)
+	if err != nil {
+		return err
+	}
+	if _, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("command %q failed: %v", "security remove-trusted-cert", err)
+	}
+	return nil
 }

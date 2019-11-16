@@ -1,4 +1,4 @@
-// Package truststore adds and removes certificates from the system truststore.
+// Package truststore adds and removes certificates from system truststores.
 package truststore
 
 import (
@@ -13,10 +13,12 @@ import (
 	"sync"
 )
 
-// Truststore installs, uninstalls, & enumerates certificates on the store.
+// Truststore represents a store of root certificates on the system.
 type Truststore interface {
 	// Install installs the PEM-encoded certificate at path.
 	Install(path string) error
+	// Uninstall removes the PEM-encoded certificate at path.
+	Uninstall(path string) error
 }
 
 func pathExists(path string) bool {

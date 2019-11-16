@@ -2,6 +2,7 @@ package truststore
 
 import (
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -39,6 +40,30 @@ func (w *windowsTruststore) Install(path string) error {
 	}
 	defer store.close()
 	return store.addCert(cert)
+}
+
+// Uninstall removes the PEM-encoded certificate at path from the system store.
+func (w *windowsTruststore) Uninstall(path string) error {
+	c, err := decodeCert(path)
+	if err != nil {
+		return fmt.Errorf("failed to parse root certificate: %v", err)
+	}
+
+	store, err := openWindowsRootStore()
+	if err != nil {
+		return fmt.Errorf("failed to open root store: %v", err)
+	}
+	defer store.close()
+
+	// Do the deletion
+	deletedAny, err := store.deleteCertsWithSerial(c.SerialNumber)
+	if err != nil {
+		return err
+	}
+	if !deletedAny {
+		return errors.New("no certs found")
+	}
+	return nil
 }
 
 type windowsRootStore uintptr

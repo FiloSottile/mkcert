@@ -77,6 +77,28 @@ func (j *javaTruststore) Install(path string) error {
 	return nil
 }
 
+// Uninstall removes the PEM-encoded certificate at path from the system store.
+func (j *javaTruststore) Uninstall(path string) error {
+	c, err := decodeCert(path)
+	if err != nil {
+		return fmt.Errorf("failed to parse root certificate: %v", err)
+	}
+
+	out, err := j.execKeytool(
+		"-delete",
+		"-alias", strings.Replace("mkcert development CA "+c.SerialNumber.String(), " ", "_", -1),
+		"-keystore", j.cacertsPath,
+		"-storepass", storePass,
+	)
+	if err != nil {
+		return fmt.Errorf("command %q failed: %v", "keytool -delete", err)
+	}
+	if bytes.Contains(out, []byte("does not exist")) {
+		return errors.New("certifcate not present in truststore")
+	}
+	return nil
+}
+
 // execKeytool will execute a "keytool" command and if needed re-execute
 // the command with commandWithSudo to work around file permissions.
 func (j *javaTruststore) execKeytool(args ...string) ([]byte, error) {

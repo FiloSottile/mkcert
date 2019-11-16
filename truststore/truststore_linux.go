@@ -22,7 +22,7 @@ type installCommand struct {
 	command      []string
 }
 
-func installStrategy() (installCommand, error) {
+func strategy() (installCommand, error) {
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		return installCommand{
 			rootsPattern: "/etc/pki/ca-trust/source/anchors/%s.pem",
@@ -59,7 +59,7 @@ func (i *linuxStore) Install(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse root certificate: %v", err)
 	}
-	strategy, err := installStrategy()
+	strategy, err := strategy()
 	if err != nil {
 		return err
 	}
@@ -78,6 +78,45 @@ func (i *linuxStore) Install(path string) error {
 		return err
 	}
 	if _, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("command %q failed: %v", strings.Join(strategy.command, " "), err)
+	}
+	return nil
+}
+
+// Uninstall removes the PEM-encoded certificate at path from the system store.
+func (i *linuxStore) Uninstall(path string) error {
+	c, err := decodeCert(path)
+	if err != nil {
+		return fmt.Errorf("failed to parse root certificate: %v", err)
+	}
+	strategy, err := strategy()
+	if err != nil {
+		return err
+	}
+	cmd, err := commandWithSudo("rm", "-f", fmt.Sprintf(strategy.rootsPattern, strings.Replace("mkcert development CA "+c.SerialNumber.String(), " ", "_", -1)))
+	if err != nil {
+		return err
+	}
+	if _, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("command %q failed: %v", "rm", err)
+	}
+
+	// We used to install under non-unique filenames.
+	legacyFilename := fmt.Sprintf(strategy.rootsPattern, "mkcert-rootCA")
+	if pathExists(legacyFilename) {
+		cmd, err := commandWithSudo("rm", "-f", legacyFilename)
+		if err != nil {
+			return err
+		}
+		if _, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("command %q failed: %v", "rm (legacy filename)", err)
+		}
+	}
+
+	if cmd, err = commandWithSudo(strategy.command...); err != nil {
+		return err
+	}
+	if _, err = cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("command %q failed: %v", strings.Join(strategy.command, " "), err)
 	}
 	return nil

@@ -52,6 +52,26 @@ func (n *nss) Install(path string) error {
 	return nil
 }
 
+// Uninstall removes the PEM-encoded certificate at path from the system store.
+func (n *nss) Uninstall(path string) error {
+	c, err := decodeCert(path)
+	if err != nil {
+		return fmt.Errorf("failed to parse root certificate: %v", err)
+	}
+	uniqueName := strings.Replace("mkcert development CA "+c.SerialNumber.String(), " ", "_", -1)
+
+	_, err = n.forEachNSSProfile(func(profile string) error {
+		if _, err := n.execCertutil("-V", "-d", profile, "-u", "L", "-n", uniqueName); err != nil {
+			return nil // No valid cert with  uniqueName in profile.
+		}
+		if _, err := n.execCertutil("-D", "-d", profile, "-n", uniqueName); err != nil {
+			return fmt.Errorf("command %q failed: %v", "certutil -D -d "+profile, err)
+		}
+		return nil
+	})
+	return err
+}
+
 // certutilPath returns an absolute path to the certutil binary, or
 // the empty string if the binary was not found.
 func certutilPath() string {
