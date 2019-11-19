@@ -31,10 +31,15 @@ func init() {
 		CertutilInstallHelp = "yum install nss-tools"
 	case binaryExists("zypper"):
 		CertutilInstallHelp = "zypper install mozilla-nss-tools"
+	case binaryExists("emerge"):
+		CertutilInstallHelp = "USE=utils emerge dev-libs/nss"
 	}
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
+	} else if pathExists("/usr/share/ca-certificates/") {
+		SystemTrustFilename = "/usr/share/ca-certificates/%s.crt"
+		SystemTrustCommand = []string{"update-ca-certificates"}
 	} else if pathExists("/usr/local/share/ca-certificates/") {
 		SystemTrustFilename = "/usr/local/share/ca-certificates/%s.crt"
 		SystemTrustCommand = []string{"update-ca-certificates"}

@@ -113,7 +113,7 @@ mkcert supports the following root stores:
 * Windows system store
 * Linux variants that provide either
     * `update-ca-trust` (Fedora, RHEL, CentOS) or
-    * `update-ca-certificates` (Ubuntu, Debian, OpenSUSE, SLES) or
+    * `update-ca-certificates` (Ubuntu, Debian, OpenSUSE, SLES, Gentoo) or
     * `trust` (Arch)
 * Firefox (macOS and Linux only)
 * Chrome and Chromium
