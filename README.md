@@ -144,15 +144,13 @@ To only install the local root CA into a subset of them, you can set the `TRUST_
 	    all other flags and arguments except -install and -cert-file.
 ```
 
-> **Note:** You _must_ place this options before the domain names list.
+> **Note:** You _must_ place these options before the domain names list.
 
-**Example:**
+#### Example
 
-```bash
-mkcert -key-file ./my.key -cert-file ./my.cert  local.app *.local.app
 ```
-
-
+mkcert -key-file key.pem -cert-file cert.pem example.com *.example.com
+```
 
 ### S/MIME
 
