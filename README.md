@@ -72,7 +72,7 @@ brew install mkcert
 or build from source (requires Go 1.13+)
 
 ```
-git clone github.com/FiloSottile/mkcert
+git clone https://github.com/FiloSottile/mkcert
 go build -ldflags "-X main.Version=$(git describe --tags)"
 ```
 
