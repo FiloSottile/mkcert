@@ -24,7 +24,10 @@ var (
 		"/etc/pki/nssdb", // CentOS 7
 	}
 	firefoxPaths = []string{
-		"/usr/bin/firefox", "/Applications/Firefox.app",
+		"/usr/bin/firefox",
+		"/usr/bin/firefox-nightly",
+		"/usr/bin/firefox-developer-edition",
+		"/Applications/Firefox.app",
 		"/Applications/Firefox Developer Edition.app",
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
