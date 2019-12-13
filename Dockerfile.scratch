@@ -1,0 +1,18 @@
+FROM golang:1.13-alpine AS builder
+
+RUN apk add --no-cache make
+
+COPY .  /go/src/github.com/FiloSottile/mkcert
+WORKDIR /go/src/github.com/FiloSottile/mkcert
+
+RUN cd /go/src/github.com/FiloSottile/mkcert \
+	&& make cross-build
+
+FROM scratch
+
+# Copy mkcert binary to /mkcert
+COPY --from=builder /go/src/github.com/FiloSottile/mkcert/dist/mkcert_darwin_amd64 /mkcert
+# COPY --from=builder /go/src/github.com/FiloSottile/mkcert/dist/mkcert_linux_amd64 /mkcert
+# COPY --from=builder /go/src/github.com/FiloSottile/mkcert/mkcert/dist/mkcert_windows_amd64.exe /mkcert
+
+ENTRYPOINT ["/mkcert"]

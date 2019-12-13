@@ -1,0 +1,15 @@
+build:
+  image: golang:$$GO_VERSION
+  commands:
+   - apk --no-cache --quiet add git gcc musl-dev make libssh2-dev openssl-dev
+   - export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/local/lib/pkgconfig/"
+   - go get
+   - go build
+   #- go test
+
+matrix:
+  GO_VERSION:
+    - 1.6-alpine
+    - 1.5-alpine
+    - 1.10-alpine
+    - 1.13-alpine
