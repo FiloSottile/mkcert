@@ -7,7 +7,6 @@
 *.yml
 *.md
 Dockerfile
-Gopkg.*
 data
 data/**
 dist

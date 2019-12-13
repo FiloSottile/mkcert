@@ -16,12 +16,12 @@ cross-deps:
 ## docker-build		:	build docker container.
 .PHONY: docker-build
 docker-build:
-	@docker build -t mkcert .
+	@docker build -t mkcert:alpine3.10-go1.13 .
 
 ## docker-run		:	run docker container.
 .PHONY: docker-run
 docker-run:
-	@docker run -ti -v $(PWD)/data:/opt/mkcert/data mkcert -h
+	@docker run -ti -v $(PWD)/data:/opt/mkcert/data mkcert:alpine3.10-go1.13 $(filter-out $@,$(MAKECMDGOALS))
 
 ## docker-demo		:	run docker container with demo certificate.
 .PHONY: docker-demo
