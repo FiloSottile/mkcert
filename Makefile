@@ -26,7 +26,7 @@ docker-run:
 ## docker-demo		:	run docker container with demo certificate.
 .PHONY: docker-demo
 docker-demo:
-	@docker run -ti -v $(PWD)/data:/opt/mkcert/data mkcert example.com "*.example.com" example.test localhost 127.0.0.1 ::1
+	@docker run -ti -v $(PWD)/data:/opt/mkcert/data mkcert:alpine3.10-go1.13 example.com "*.example.com" example.test localhost 127.0.0.1 ::1
 
 ## help			:	Print commands help.
 .PHONY: help
