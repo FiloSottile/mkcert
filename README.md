@@ -78,10 +78,10 @@ go build -ldflags "-X main.Version=$(git describe --tags)"
 
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
-For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x86_64/mkcert/) is available on the official Arch Linux repository via:
+For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x86_64/mkcert/) is available on the official Arch Linux repository.
 
-```bash
-$ sudo pacman -Syu mkcert
+```
+sudo pacman -Syu mkcert
 ```
 
 ### Windows
