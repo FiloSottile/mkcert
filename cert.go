@@ -37,18 +37,24 @@ import (
 var caName string
 
 func init() {
-	caName = customCaName()
-	if caName == "" {
-		u, err := user.Current()
-		if err == nil {
-			caName = u.Username + "@"
+	root := fmt.Sprintf("%s/%s", getCAROOT(), rootName)
+	_, err := ioutil.ReadFile(root)
+	if err != nil {
+		caName = customCaName()
+		if caName == "" {
+			u, err := user.Current()
+			if err == nil {
+				caName = u.Username + "@"
+			}
+			if h, err := os.Hostname(); err == nil {
+				caName += h
+			}
+			if err == nil && u.Name != "" && u.Name != u.Username {
+				caName += " (" + u.Name + ")"
+			}
 		}
-		if h, err := os.Hostname(); err == nil {
-			caName += h
-		}
-		if err == nil && u.Name != "" && u.Name != u.Username {
-			caName += " (" + u.Name + ")"
-		}
+	} else {
+		log.Printf("Using %s as CA root", root)
 	}
 }
 
@@ -64,8 +70,8 @@ func (m *mkcert) makeCert(hosts []string) {
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
-			Organization:       []string{caName + " via mkcert"},
-			OrganizationalUnit: []string{caName},
+			Organization:       hosts,
+			OrganizationalUnit: hosts,
 		},
 
 		NotAfter: time.Now().AddDate(10, 0, 0),
