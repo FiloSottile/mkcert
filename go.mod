@@ -1,4 +1,4 @@
-module github.com/FiloSottile/mkcert
+module filippo.io/mkcert
 
 go 1.13
 
