@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 
@@ -78,8 +79,10 @@ const advancedUsage = `Advanced options:
 
 `
 
-// Version is set more precisely at build time.
-var Version = "v1.4.1-dev"
+// Version can be set at link time to override debug.BuildInfo.Main.Version,
+// which is "(devel)" when building from within the module. See
+// golang.org/issue/29814 and golang.org/issue/29228.
+var Version string
 
 func main() {
 	log.SetFlags(0)
@@ -108,7 +111,13 @@ func main() {
 		return
 	}
 	if *versionFlag {
-		fmt.Println(Version)
+		if Version != "" {
+			fmt.Println(Version)
+		}
+		if buildInfo, ok := debug.ReadBuildInfo(); ok {
+			fmt.Println(buildInfo.Main.Version)
+		}
+		fmt.Println("(unknown)")
 		return
 	}
 	if *carootFlag {
