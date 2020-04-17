@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -15,6 +16,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/big"
@@ -32,18 +34,27 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-var userAndHostname string
+var caName string
 
 func init() {
-	u, err := user.Current()
-	if err == nil {
-		userAndHostname = u.Username + "@"
-	}
-	if h, err := os.Hostname(); err == nil {
-		userAndHostname += h
-	}
-	if err == nil && u.Name != "" && u.Name != u.Username {
-		userAndHostname += " (" + u.Name + ")"
+	root := fmt.Sprintf("%s/%s", getCAROOT(), rootName)
+	_, err := ioutil.ReadFile(root)
+	if err != nil {
+		caName = customCaName()
+		if caName == "" {
+			u, err := user.Current()
+			if err == nil {
+				caName = u.Username + "@"
+			}
+			if h, err := os.Hostname(); err == nil {
+				caName += h
+			}
+			if err == nil && u.Name != "" && u.Name != u.Username {
+				caName += " (" + u.Name + ")"
+			}
+		}
+	} else {
+		log.Printf("Using %s as CA root", root)
 	}
 }
 
@@ -59,11 +70,11 @@ func (m *mkcert) makeCert(hosts []string) {
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
-			Organization:       []string{"mkcert development certificate"},
-			OrganizationalUnit: []string{userAndHostname},
+			Organization:       hosts,
+			OrganizationalUnit: hosts,
 		},
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter: time.Now().AddDate(10, 0, 0),
 
 		// Fix the notBefore to temporarily bypass macOS Catalina's limit on
 		// certificate lifespan. Once mkcert provides an ACME server, automation
@@ -307,13 +318,13 @@ func (m *mkcert) newCA() {
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
-			Organization:       []string{"mkcert development CA"},
-			OrganizationalUnit: []string{userAndHostname},
+			Organization:       []string{caName + " via mkcert"},
+			OrganizationalUnit: []string{caName},
 
 			// The CommonName is required by iOS to show the certificate in the
 			// "Certificate Trust Settings" menu.
 			// https://github.com/FiloSottile/mkcert/issues/47
-			CommonName: "mkcert " + userAndHostname,
+			CommonName: caName,
 		},
 		SubjectKeyId: skid[:],
 
@@ -345,4 +356,27 @@ func (m *mkcert) newCA() {
 
 func (m *mkcert) caUniqueName() string {
 	return "mkcert development CA " + m.caCert.SerialNumber.String()
+}
+
+func customCaName() string {
+	reader := bufio.NewReader(os.Stdin)
+	var ca string
+	var custom bool
+
+	fmt.Println("Would you like a custom CA name?(y/n) Default is 'mkcert user@host')")
+
+	var s string
+	fmt.Scan(&s)
+	s = strings.TrimSpace(s)
+	s = strings.ToLower(s)
+	if s == "y" || s == "yes" {
+		custom = true
+	}
+
+	if custom {
+		fmt.Print("CA Name: ")
+		ca, _ = reader.ReadString('\n')
+		ca = strings.Replace(ca, "\n", "", -1)
+	}
+	return ca
 }
