@@ -106,8 +106,8 @@ func main() {
 	}
 	flag.Parse()
 	if *helpFlag {
-		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
-		fmt.Fprint(flag.CommandLine.Output(), advancedUsage)
+		fmt.Print(shortUsage)
+		fmt.Print(advancedUsage)
 		return
 	}
 	if *versionFlag {
