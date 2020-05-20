@@ -108,15 +108,26 @@ func (m *mkcert) makeCert(hosts []string) {
 	certFile, keyFile, p12File := m.fileNames(hosts)
 
 	if !m.pkcs12 {
-		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
-		fatalIfErr(err, "failed to encode certificate key")
-		err = ioutil.WriteFile(keyFile, pem.EncodeToMemory(
-			&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
-		fatalIfErr(err, "failed to save certificate key")
-
 		err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
 			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 		fatalIfErr(err, "failed to save certificate")
+
+		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
+		fatalIfErr(err, "failed to encode certificate key")
+
+		if certFile == keyFile {
+			fp, err := os.OpenFile(certFile, os.O_WRONLY|os.O_APPEND, 0600)
+			fatalIfErr(err, "failed to save certificate key")
+			_, err = fp.Write(pem.EncodeToMemory(
+				&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}))
+			fatalIfErr(err, "failed to save certificate key")
+			err = fp.Close()
+			fatalIfErr(err, "failed to save certificate key")
+		} else {
+			err = ioutil.WriteFile(keyFile, pem.EncodeToMemory(
+				&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
+			fatalIfErr(err, "failed to save certificate key")
+		}
 	} else {
 		domainCert, _ := x509.ParseCertificate(cert)
 		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
@@ -128,7 +139,11 @@ func (m *mkcert) makeCert(hosts []string) {
 	m.printHosts(hosts)
 
 	if !m.pkcs12 {
-		log.Printf("\nThe certificate is at \"%s\" and the key at \"%s\" ✅\n\n", certFile, keyFile)
+		if certFile == keyFile {
+			log.Printf("\nThe certificate and key are at \"%s\" ✅\n\n", certFile)
+		} else {
+			log.Printf("\nThe certificate is at \"%s\" and the key at \"%s\" ✅\n\n", certFile, keyFile)
+		}
 	} else {
 		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
