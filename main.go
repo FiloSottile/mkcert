@@ -66,7 +66,9 @@ const advancedUsage = `Advanced options:
 	    all other flags and arguments except -install and -cert-file.
 
 	-CAROOT
-	    Print the CA certificate and key storage location.
+		Print the CA certificate and key storage location.
+		
+	-CANAME
 
 	$CAROOT (environment variable)
 	    Set the CA certificate and key storage location. (This allows
@@ -94,6 +96,7 @@ func main() {
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
+		caNameFlag    = flag.String("CANAME", "rootCA", "")
 		csrFlag       = flag.String("csr", "", "")
 		certFileFlag  = flag.String("cert-file", "", "")
 		keyFileFlag   = flag.String("key-file", "", "")
@@ -145,8 +148,8 @@ func main() {
 	}).Run(flag.Args())
 }
 
-const rootName = "rootCA.pem"
-const rootKeyName = "rootCA-key.pem"
+const rootName = caNameFlag + ".pem"
+const rootKeyName = caNameFlag + "-key.pem"
 
 type mkcert struct {
 	installMode, uninstallMode bool
