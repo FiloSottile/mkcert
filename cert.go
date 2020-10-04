@@ -174,15 +174,17 @@ func (m *mkcert) fileNames(hosts []string) (certFile, keyFile, p12File string) {
 		defaultName += "-client"
 	}
 
-	certFile = "./" + defaultName + ".pem"
+	path := filepath.Clean(m.outputPath)
+
+	certFile = path + "/" + defaultName + ".pem"
 	if m.certFile != "" {
 		certFile = m.certFile
 	}
-	keyFile = "./" + defaultName + "-key.pem"
+	keyFile = path + "/" + defaultName + "-key.pem"
 	if m.keyFile != "" {
 		keyFile = m.keyFile
 	}
-	p12File = "./" + defaultName + ".p12"
+	p12File = path + "/" + defaultName + ".p12"
 	if m.p12File != "" {
 		p12File = m.p12File
 	}

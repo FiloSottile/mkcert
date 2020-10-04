@@ -41,6 +41,9 @@ const shortUsage = `Usage of mkcert:
 	$ mkcert "*.example.it"
 	Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
 
+	$ mkcert -output ./certs example.org
+	Generate "example.org.pem" and "example.org-key.pem" in "./certs".
+
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
@@ -50,6 +53,9 @@ const advancedUsage = `Advanced options:
 
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 	    Customize the output paths.
+
+	-output PATH
+	    Specify the output path of the certificates.
 
 	-client
 	    Generate a certificate for client authentication.
@@ -99,6 +105,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		outputFlag    = flag.String("output", "", "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -141,7 +148,7 @@ func main() {
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
-		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag, outputPath: *outputFlag,
 	}).Run(flag.Args())
 }
 
@@ -153,6 +160,7 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
+	outputPath                 string
 
 	CAROOT string
 	caCert *x509.Certificate
