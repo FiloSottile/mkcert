@@ -63,7 +63,7 @@ func (m *mkcert) makeCert(hosts []string) {
 			OrganizationalUnit: []string{userAndHostname},
 		},
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter:  time.Now().AddDate(3, 0, 0),
 
 		// Fix the notBefore to temporarily bypass macOS Catalina's limit on
 		// certificate lifespan. Once mkcert provides an ACME server, automation
@@ -220,7 +220,7 @@ func (m *mkcert) makeCertFromCSR() {
 		Subject:         csr.Subject,
 		ExtraExtensions: csr.Extensions, // includes requested SANs
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter:  time.Now().AddDate(3, 0, 0),
 		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
@@ -317,7 +317,7 @@ func (m *mkcert) newCA() {
 		},
 		SubjectKeyId: skid[:],
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter:  time.Now().AddDate(3, 0, 0),
 		NotBefore: time.Now(),
 
 		KeyUsage: x509.KeyUsageCertSign,
