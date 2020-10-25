@@ -56,6 +56,11 @@ func (m *mkcert) makeCert(hosts []string) {
 	fatalIfErr(err, "failed to generate certificate key")
 	pub := priv.(crypto.Signer).Public()
 
+	// Certificates last for 2 years and 3 months, which is always less than
+	// 825 days, the limit that macOS/iOS apply to all certificates,
+	// including custom roots. See https://support.apple.com/en-us/HT210176.
+	expiration := time.Now().AddDate(2, 3, 0)
+
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
@@ -63,14 +68,8 @@ func (m *mkcert) makeCert(hosts []string) {
 			OrganizationalUnit: []string{userAndHostname},
 		},
 
-		NotAfter: time.Now().AddDate(10, 0, 0),
-
-		// Fix the notBefore to temporarily bypass macOS Catalina's limit on
-		// certificate lifespan. Once mkcert provides an ACME server, automation
-		// will be the recommended way to guarantee uninterrupted functionality,
-		// and the lifespan will be shortened to 825 days. See issue 174 and
-		// https://support.apple.com/en-us/HT210176.
-		NotBefore: time.Date(2019, time.June, 1, 0, 0, 0, 0, time.UTC),
+		NotAfter:  expiration,
+		NotBefore: time.Now(),
 
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		BasicConstraintsValid: true,
@@ -134,6 +133,8 @@ func (m *mkcert) makeCert(hosts []string) {
 		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
+
+	log.Printf("It will expire on %s 🗓\n\n", expiration.Format("2 January 2006"))
 }
 
 func (m *mkcert) printHosts(hosts []string) {
