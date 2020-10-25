@@ -28,6 +28,7 @@ var (
 		"/usr/bin/firefox-nightly",
 		"/usr/bin/firefox-developer-edition",
 		"/Applications/Firefox.app",
+		"/Applications/FirefoxDeveloperEdition.app",
 		"/Applications/Firefox Developer Edition.app",
 		"/Applications/Firefox Nightly.app",
 		"C:\\Program Files\\Mozilla Firefox",
