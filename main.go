@@ -184,18 +184,18 @@ func (m *mkcert) Run(args []string) {
 		var warning bool
 		if storeEnabled("system") && !m.checkPlatform() {
 			warning = true
-			log.Println("Warning: the local CA is not installed in the system trust store! ⚠️")
+			log.Println("Note: the local CA is not installed in the system trust store.")
 		}
 		if storeEnabled("nss") && hasNSS && CertutilInstallHelp != "" && !m.checkNSS() {
 			warning = true
-			log.Printf("Warning: the local CA is not installed in the %s trust store! ⚠️", NSSBrowsers)
+			log.Printf("Note: the local CA is not installed in the %s trust store.", NSSBrowsers)
 		}
 		if storeEnabled("java") && hasJava && !m.checkJava() {
 			warning = true
-			log.Println("Warning: the local CA is not installed in the Java trust store! ⚠️")
+			log.Println("Note: the local CA is not installed in the Java trust store.")
 		}
 		if warning {
-			log.Println("Run \"mkcert -install\" to avoid verification errors ‼️")
+			log.Println("Run \"mkcert -install\" for certificates to be trusted automatically ⚠️")
 		}
 	}
 
