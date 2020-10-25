@@ -161,7 +161,7 @@ mkcert filippo@example.com
 
 For the certificates to be trusted on mobile devices, you will have to install the root CA. It's the `rootCA.pem` file in the folder printed by `mkcert -CAROOT`.
 
-On iOS, you can either use AirDrop, email the CA to yourself, or serve it from an HTTP server. After installing it, you must [enable full trust in it](https://support.apple.com/en-nz/HT204477). **Note**: earlier versions of mkcert ran into [an iOS bug](https://forums.developer.apple.com/thread/89568), if you can't see the root in "Certificate Trust Settings" you might have to update mkcert and [regenerate the root](https://github.com/FiloSottile/mkcert/issues/47#issuecomment-408724149).
+On iOS, you can either use AirDrop, email the CA to yourself, or serve it from an HTTP server. After opening it, you need to [install the profile in Settings > Profile Downloaded](https://github.com/FiloSottile/mkcert/issues/233#issuecomment-690110809) and then [enable full trust in it](https://support.apple.com/en-nz/HT204477).
 
 For Android, you will have to install the CA and then enable user roots in the development build of your app. See [this StackOverflow answer](https://stackoverflow.com/a/22040887/749014).
 
