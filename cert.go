@@ -261,8 +261,6 @@ func (m *mkcert) makeCertFromCSR() {
 func (m *mkcert) loadCA() {
 	if !pathExists(filepath.Join(m.CAROOT, rootName)) {
 		m.newCA()
-	} else {
-		log.Printf("Using the local CA at \"%s\" ✨\n", m.CAROOT)
 	}
 
 	certPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
@@ -341,7 +339,7 @@ func (m *mkcert) newCA() {
 		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
 	fatalIfErr(err, "failed to save CA key")
 
-	log.Printf("Created a new local CA at \"%s\" 💥\n", m.CAROOT)
+	log.Printf("Created a new local CA 💥\n")
 }
 
 func (m *mkcert) caUniqueName() string {
