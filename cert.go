@@ -63,7 +63,7 @@ func (m *mkcert) makeCert(hosts []string) {
 			OrganizationalUnit: []string{userAndHostname},
 		},
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter: time.Now().AddDate(10, 0, 0),
 
 		// Fix the notBefore to temporarily bypass macOS Catalina's limit on
 		// certificate lifespan. Once mkcert provides an ACME server, automation
@@ -208,7 +208,8 @@ func (m *mkcert) makeCertFromCSR() {
 	if csrPEM == nil {
 		log.Fatalln("ERROR: failed to read the CSR: unexpected content")
 	}
-	if csrPEM.Type != "CERTIFICATE REQUEST" {
+	if csrPEM.Type != "CERTIFICATE REQUEST" &&
+		csrPEM.Type != "NEW CERTIFICATE REQUEST" {
 		log.Fatalln("ERROR: failed to read the CSR: expected CERTIFICATE REQUEST, got " + csrPEM.Type)
 	}
 	csr, err := x509.ParseCertificateRequest(csrPEM.Bytes)
