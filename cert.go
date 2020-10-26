@@ -108,24 +108,18 @@ func (m *mkcert) makeCert(hosts []string) {
 	certFile, keyFile, p12File := m.fileNames(hosts)
 
 	if !m.pkcs12 {
-		err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
-			&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
-		fatalIfErr(err, "failed to save certificate")
-
+		certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert})
 		privDER, err := x509.MarshalPKCS8PrivateKey(priv)
 		fatalIfErr(err, "failed to encode certificate key")
+		privPEM := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: privDER})
 
 		if certFile == keyFile {
-			fp, err := os.OpenFile(certFile, os.O_WRONLY|os.O_APPEND, 0600)
-			fatalIfErr(err, "failed to save certificate key")
-			_, err = fp.Write(pem.EncodeToMemory(
-				&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}))
-			fatalIfErr(err, "failed to save certificate key")
-			err = fp.Close()
-			fatalIfErr(err, "failed to save certificate key")
+			err = ioutil.WriteFile(keyFile, append(certPEM, privPEM...), 0600)
+			fatalIfErr(err, "failed to save certificate and key")
 		} else {
-			err = ioutil.WriteFile(keyFile, pem.EncodeToMemory(
-				&pem.Block{Type: "PRIVATE KEY", Bytes: privDER}), 0600)
+			err = ioutil.WriteFile(certFile, certPEM, 0644)
+			fatalIfErr(err, "failed to save certificate")
+			err = ioutil.WriteFile(keyFile, privPEM, 0600)
 			fatalIfErr(err, "failed to save certificate key")
 		}
 	} else {
