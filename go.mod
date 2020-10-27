@@ -3,6 +3,7 @@ module filippo.io/mkcert
 go 1.13
 
 require (
+	github.com/stretchr/testify v1.4.0
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	golang.org/x/tools v0.0.0-20191108193012-7d206e10da11
 	honnef.co/go/tools v0.0.0-20191107024926-a9480a3ec3bc
