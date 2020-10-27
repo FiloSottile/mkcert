@@ -93,7 +93,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		tpl.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	}
 	if len(tpl.EmailAddresses) > 0 {
-		tpl.ExtKeyUsage = append(tpl.ExtKeyUsage, x509.ExtKeyUsageCodeSigning, x509.ExtKeyUsageEmailProtection)
+		tpl.ExtKeyUsage = append(tpl.ExtKeyUsage, x509.ExtKeyUsageEmailProtection)
 	}
 
 	// IIS (the main target of PKCS #12 files), only shows the deprecated
