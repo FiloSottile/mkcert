@@ -225,22 +225,30 @@ func (m *mkcert) makeCertFromCSR() {
 	fatalIfErr(err, "failed to parse the CSR")
 	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
 
+	expiration := time.Now().AddDate(2, 3, 0)
 	tpl := &x509.Certificate{
 		SerialNumber:    randomSerialNumber(),
 		Subject:         csr.Subject,
-		ExtraExtensions: csr.Extensions, // includes requested SANs
+		ExtraExtensions: csr.Extensions, // includes requested SANs, KUs and EKUs
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotBefore: time.Now(),
-
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: true,
+		NotBefore: time.Now(), NotAfter: expiration,
 
 		// If the CSR does not request a SAN extension, fix it up for them as
 		// the Common Name field does not work in modern browsers. Otherwise,
 		// this will get overridden.
 		DNSNames: []string{csr.Subject.CommonName},
+
+		// Likewise, if the CSR does not set KUs and EKUs, fix it up as Apple
+		// platforms require serverAuth for TLS.
+		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+
+	if m.client {
+		tpl.ExtKeyUsage = append(tpl.ExtKeyUsage, x509.ExtKeyUsageClientAuth)
+	}
+	if len(csr.EmailAddresses) > 0 {
+		tpl.ExtKeyUsage = append(tpl.ExtKeyUsage, x509.ExtKeyUsageEmailProtection)
 	}
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, csr.PublicKey, m.caKey)
@@ -252,8 +260,8 @@ func (m *mkcert) makeCertFromCSR() {
 	for _, ip := range csr.IPAddresses {
 		hosts = append(hosts, ip.String())
 	}
-	if len(hosts) == 0 {
-		hosts = []string{csr.Subject.CommonName}
+	for _, uri := range csr.URIs {
+		hosts = append(hosts, uri.String())
 	}
 	certFile, _, _ := m.fileNames(hosts)
 
@@ -264,6 +272,8 @@ func (m *mkcert) makeCertFromCSR() {
 	m.printHosts(hosts)
 
 	log.Printf("\nThe certificate is at \"%s\" ✅\n\n", certFile)
+
+	log.Printf("It will expire on %s 🗓\n\n", expiration.Format("2 January 2006"))
 }
 
 // loadCA will load or create the CA at CAROOT.
