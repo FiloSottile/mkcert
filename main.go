@@ -68,6 +68,16 @@ const advancedUsage = `Advanced options:
 	-CAROOT
 	    Print the CA certificate and key storage location.
 
+	-permit DOMAINS
+	    Add a comma-separated domain whitelist to the local CA.
+	    NB: implementations are *not* required to check this whitelist
+	    when verifying a certificate (though many do) - don't rely on
+	    it for security.
+
+	    $ mkcert -install -permit example.org,.example.org
+	    Generate a CA that only allows certificates for example.org and
+	    subdomains.
+
 	$CAROOT (environment variable)
 	    Set the CA certificate and key storage location. (This allows
 	    maintaining multiple local CAs in parallel.)
@@ -99,6 +109,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		permitFlag    = flag.String("permit", "", "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -138,10 +149,15 @@ func main() {
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
+	var dnsWhitelist = []string{}
+	if *permitFlag != "" {
+		dnsWhitelist = strings.Split(*permitFlag, ",")
+	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		dnsWhitelist: dnsWhitelist,
 	}).Run(flag.Args())
 }
 
@@ -153,6 +169,7 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
+	dnsWhitelist               []string
 
 	CAROOT string
 	caCert *x509.Certificate

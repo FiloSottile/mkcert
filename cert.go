@@ -280,6 +280,8 @@ func (m *mkcert) makeCertFromCSR() {
 func (m *mkcert) loadCA() {
 	if !pathExists(filepath.Join(m.CAROOT, rootName)) {
 		m.newCA()
+	} else if len(m.dnsWhitelist) > 0 {
+		log.Println("WARN: CA already exists, -permit flag is being ignored")
 	}
 
 	certPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
@@ -343,6 +345,8 @@ func (m *mkcert) newCA() {
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 		MaxPathLenZero:        true,
+
+		PermittedDNSDomains: m.dnsWhitelist,
 	}
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, pub, priv)
