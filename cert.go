@@ -32,9 +32,11 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-var userAndHostname string
+var caName string
 
 func init() {
+	var userAndHostname string
+
 	u, err := user.Current()
 	if err == nil {
 		userAndHostname = u.Username + "@"
@@ -44,6 +46,13 @@ func init() {
 	}
 	if err == nil && u.Name != "" && u.Name != u.Username {
 		userAndHostname += " (" + u.Name + ")"
+	}
+
+	var envCaName = os.Getenv("MKCERT_CANAME") 
+	if envCaName != "" {
+		caName = envCaName
+	} else {
+		caName = userAndHostname
 	}
 }
 
@@ -65,7 +74,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"mkcert development certificate"},
-			OrganizationalUnit: []string{userAndHostname},
+			OrganizationalUnit: []string{caName},
 		},
 
 		NotBefore: time.Now(), NotAfter: expiration,
@@ -326,12 +335,12 @@ func (m *mkcert) newCA() {
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
 			Organization:       []string{"mkcert development CA"},
-			OrganizationalUnit: []string{userAndHostname},
+			OrganizationalUnit: []string{caName},
 
 			// The CommonName is required by iOS to show the certificate in the
 			// "Certificate Trust Settings" menu.
 			// https://github.com/FiloSottile/mkcert/issues/47
-			CommonName: "mkcert " + userAndHostname,
+			CommonName: "mkcert " + caName,
 		},
 		SubjectKeyId: skid[:],
 
