@@ -1,6 +1,6 @@
 on:
   release:
-    types: [created]
+    types: [published]
 name: Upload Release Asset
 jobs:
   release:
