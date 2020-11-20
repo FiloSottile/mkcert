@@ -2,6 +2,7 @@ on: [push, pull_request]
 name: Test
 jobs:
   test:
+    name: Go tests
     strategy:
       fail-fast: false
       matrix:
@@ -17,5 +18,5 @@ jobs:
       uses: actions/checkout@v2
     - name: Run analyses
       run: go run analysis.go ./...
-    - name: Test
+    - name: Run tests
       run: go test -race ./...
