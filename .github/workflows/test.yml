@@ -3,6 +3,7 @@ name: Test
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         go: [1.14.x, 1.15.x, 1.x]
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -17,4 +18,4 @@ jobs:
     - name: Run analyses
       run: go run analysis.go ./...
     - name: Test
-      run: go test ./...
+      run: go test -race ./...
