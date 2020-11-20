@@ -25,18 +25,18 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs').promises;
+            const fs = require("fs").promises;
             const { repo: { owner, repo }, sha } = context;
 
             const release = await github.repos.getReleaseByTag({
               owner, repo,
-              tag: process.env.GITHUB_REF,
+              tag: process.env.GITHUB_REF.replace("refs/tags/", ""),
             });
-            console.log('Release:', { release });
+            console.log("Release:", { release });
 
-            for (let file of await fs.readdir('.')) {
-              if (!file.startsWith('mkcert-')) continue;
-              console.log('Uploading', file);
+            for (let file of await fs.readdir(".")) {
+              if (!file.startsWith("mkcert-")) continue;
+              console.log("Uploading", file);
               await github.repos.uploadReleaseAsset({
                 owner, repo,
                 release_id: release.data.id,
