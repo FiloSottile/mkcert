@@ -28,7 +28,7 @@ jobs:
             const fs = require('fs').promises;
             const { repo: { owner, repo }, sha } = context;
 
-            const release = await octokit.repos.getReleaseByTag({
+            const release = await github.repos.getReleaseByTag({
               owner, repo,
               tag: process.env.GITHUB_REF,
             });
