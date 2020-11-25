@@ -20,17 +20,19 @@ import (
 	"golang.org/x/tools/go/analysis/passes/copylock"
 	"golang.org/x/tools/go/analysis/passes/errorsas"
 	"golang.org/x/tools/go/analysis/passes/httpresponse"
+	"golang.org/x/tools/go/analysis/passes/ifaceassert"
 	"golang.org/x/tools/go/analysis/passes/loopclosure"
 	"golang.org/x/tools/go/analysis/passes/lostcancel"
 	"golang.org/x/tools/go/analysis/passes/nilfunc"
 	"golang.org/x/tools/go/analysis/passes/printf"
 	"golang.org/x/tools/go/analysis/passes/shift"
 	"golang.org/x/tools/go/analysis/passes/stdmethods"
+	"golang.org/x/tools/go/analysis/passes/stringintconv"
 	"golang.org/x/tools/go/analysis/passes/structtag"
+	"golang.org/x/tools/go/analysis/passes/testinggoroutine"
 	"golang.org/x/tools/go/analysis/passes/tests"
 	"golang.org/x/tools/go/analysis/passes/unmarshal"
 	"golang.org/x/tools/go/analysis/passes/unreachable"
-	"golang.org/x/tools/go/analysis/passes/unsafeptr"
 	"golang.org/x/tools/go/analysis/passes/unusedresult"
 
 	"honnef.co/go/tools/simple"
@@ -42,6 +44,7 @@ func main() {
 	var analyzers []*analysis.Analyzer
 
 	// Add all cmd/vet analyzers.
+	// https://github.com/golang/go/issues/35487
 	analyzers = append(analyzers,
 		asmdecl.Analyzer,
 		assign.Analyzer,
@@ -53,17 +56,22 @@ func main() {
 		copylock.Analyzer,
 		errorsas.Analyzer,
 		httpresponse.Analyzer,
+		ifaceassert.Analyzer,
 		loopclosure.Analyzer,
 		lostcancel.Analyzer,
 		nilfunc.Analyzer,
 		printf.Analyzer,
 		shift.Analyzer,
 		stdmethods.Analyzer,
+		stringintconv.Analyzer,
 		structtag.Analyzer,
 		tests.Analyzer,
+		testinggoroutine.Analyzer,
 		unmarshal.Analyzer,
 		unreachable.Analyzer,
-		unsafeptr.Analyzer,
+		// False positives when using Windows DLL procs.
+		// https://github.com/golang/go/issues/41205
+		// unsafeptr.Analyzer,
 		unusedresult.Analyzer)
 
 	for _, v := range simple.Analyzers {
