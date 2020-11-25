@@ -38,7 +38,7 @@ func (m *mkcert) installPlatform() bool {
 	fatalIfErr(err, "failed to read root certificate")
 	// Decode PEM
 	if certBlock, _ := pem.Decode(cert); certBlock == nil || certBlock.Type != "CERTIFICATE" {
-		fatalIfErr(fmt.Errorf("Invalid PEM data"), "decode pem")
+		fatalIfErr(fmt.Errorf("invalid PEM data"), "decode pem")
 	} else {
 		cert = certBlock.Bytes
 	}
@@ -60,7 +60,7 @@ func (m *mkcert) uninstallPlatform() bool {
 	// Do the deletion
 	deletedAny, err := store.deleteCertsWithSerial(m.caCert.SerialNumber)
 	if err == nil && !deletedAny {
-		err = fmt.Errorf("No certs found")
+		err = fmt.Errorf("no certs found")
 	}
 	fatalIfErr(err, "delete cert")
 	return true
@@ -69,11 +69,15 @@ func (m *mkcert) uninstallPlatform() bool {
 type windowsRootStore uintptr
 
 func openWindowsRootStore() (windowsRootStore, error) {
-	store, _, err := procCertOpenSystemStoreW.Call(0, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("ROOT"))))
+	rootStr, err := syscall.UTF16PtrFromString("ROOT")
+	if err != nil {
+		return 0, err
+	}
+	store, _, err := procCertOpenSystemStoreW.Call(0, uintptr(unsafe.Pointer(rootStr)))
 	if store != 0 {
 		return windowsRootStore(store), nil
 	}
-	return 0, fmt.Errorf("Failed to open windows root store: %v", err)
+	return 0, fmt.Errorf("failed to open windows root store: %v", err)
 }
 
 func (w windowsRootStore) close() error {
@@ -81,7 +85,7 @@ func (w windowsRootStore) close() error {
 	if ret != 0 {
 		return nil
 	}
-	return fmt.Errorf("Failed to close windows root store: %v", err)
+	return fmt.Errorf("failed to close windows root store: %v", err)
 }
 
 func (w windowsRootStore) addCert(cert []byte) error {
@@ -97,7 +101,7 @@ func (w windowsRootStore) addCert(cert []byte) error {
 	if ret != 0 {
 		return nil
 	}
-	return fmt.Errorf("Failed adding cert: %v", err)
+	return fmt.Errorf("failed adding cert: %v", err)
 }
 
 func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
@@ -111,7 +115,7 @@ func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
 			if errno, ok := err.(syscall.Errno); ok && errno == 0x80092004 {
 				break
 			}
-			return deletedAny, fmt.Errorf("Failed enumerating certs: %v", err)
+			return deletedAny, fmt.Errorf("failed enumerating certs: %v", err)
 		}
 		// Parse cert
 		certBytes := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length]
@@ -121,10 +125,10 @@ func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
 			// Duplicate the context so it doesn't stop the enum when we delete it
 			dupCertPtr, _, err := procCertDuplicateCertificateContext.Call(uintptr(unsafe.Pointer(cert)))
 			if dupCertPtr == 0 {
-				return deletedAny, fmt.Errorf("Failed duplicating context: %v", err)
+				return deletedAny, fmt.Errorf("failed duplicating context: %v", err)
 			}
 			if ret, _, err := procCertDeleteCertificateFromStore.Call(dupCertPtr); ret == 0 {
-				return deletedAny, fmt.Errorf("Failed deleting certificate: %v", err)
+				return deletedAny, fmt.Errorf("failed deleting certificate: %v", err)
 			}
 			deletedAny = true
 		}
