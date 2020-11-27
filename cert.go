@@ -139,8 +139,8 @@ func (m *mkcert) makeCert(hosts []string) {
 		}
 	} else {
 		log.Printf("\nThe PKCS#12 bundle is at \"%s\" ✅\n", p12File)
-		if m.p12Password == "changeit" {
-			log.Printf("\nThe PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
+		if m.p12Password == defaultP12Password {
+			log.Printf("\nThe PKCS#12 encryption password is the often hardcoded default \""+defaultP12Password+"\" ℹ️\n\n")
 		} else {
 			log.Printf("\nThe PKCS#12 encryption password is \""+m.p12Password+"\" ℹ️\n\n")
 		}

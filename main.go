@@ -59,7 +59,12 @@ const advancedUsage = `Advanced options:
 
 	-pkcs12
 	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
-	    containing certificate and key for legacy applications.
+		containing certificate and key for legacy applications.
+		
+	-p12-password
+		Explicitly set the password of the	PKCS #12 file,
+		the same password is used for both the keystore and the keypair.
+		Empty passwords are NOT allowed.
 
 	-csr CSR
 	    Generate a certificate based on the supplied CSR. Conflicts with
@@ -99,7 +104,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
-		p12PasswordFlag   = flag.String("p12-password", "changeit", "")
+		p12PasswordFlag   = flag.String("p12-password", defaultP12Password, "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -139,6 +144,9 @@ func main() {
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
+	if *p12PasswordFlag == "" {
+		log.Fatalln("ERROR: blank PKCS#12 password not allowed")
+	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
@@ -148,6 +156,7 @@ func main() {
 
 const rootName = "rootCA.pem"
 const rootKeyName = "rootCA-key.pem"
+const defaultP12Password = "changeit"
 
 type mkcert struct {
 	installMode, uninstallMode bool
