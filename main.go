@@ -99,6 +99,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		p12PasswordFlag   = flag.String("p12-password", "changeit", "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -141,7 +142,7 @@ func main() {
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
-		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag, p12Password: *p12PasswordFlag,
 	}).Run(flag.Args())
 }
 
@@ -152,6 +153,7 @@ type mkcert struct {
 	installMode, uninstallMode bool
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
+	p12Password                string
 	csrPath                    string
 
 	CAROOT string
