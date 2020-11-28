@@ -62,7 +62,7 @@ const advancedUsage = `Advanced options:
 		containing certificate and key for legacy applications.
 		
 	-p12-password
-		Explicitly set the password of the	PKCS #12 file,
+		Explicitly set the password of the PKCS #12 file,
 		the same password is used for both the keystore and the keypair.
 		Empty passwords are NOT allowed.
 
