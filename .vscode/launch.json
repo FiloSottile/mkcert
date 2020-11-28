@@ -13,7 +13,7 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "env": {},
-            "args": ["-pkcs12", "-p12-file", "otms_demo.p12", "-p12-password","abcd1234","otms.demo", "localhost", "127.0.0.1"]
+            "args": ["-pkcs12", "-p12-file", "acme_demo.p12", "-p12-password","s3cr3t","acme.demo", "localhost", "127.0.0.1"]
 
         }
     ] 
