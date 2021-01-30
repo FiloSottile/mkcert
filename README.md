@@ -165,6 +165,23 @@ On iOS, you can either use AirDrop, email the CA to yourself, or serve it from a
 
 For Android, you will have to install the CA and then enable user roots in the development build of your app. See [this StackOverflow answer](https://stackoverflow.com/a/22040887/749014).
 
+### Windows Subsystem for Linux (WSL2)
+
+On WSL2, running `mkcert -install` will not install the rootCA in the windows certificate store. Users of WSL2 should extract the certificate (location given by `mkcert -CAROOT`) and use the Widows binary mkcert to install the rootCA.
+
+To do this, copy the rootCA as a pem file to (for example) `Desktop/Certs`; run `cmd.exe` as Administrator and:
+```
+C:\Users\user\Desktop\Certs>set CAROOT=c:\Users\user\Desktop\Certs
+
+C:\Users\user\Desktop\Certs>mkcert.exe -CAROOT
+c:\Users\user\Desktop\Certs
+
+C:\Users\user\Desktop\Certs>mkcert.exe -install
+Using the local CA at "c:\Users\user\Desktop\Certs" ✨
+The local CA is now installed in the system trust store! ⚡️
+Note: Firefox support is not available on your platform. ℹ️
+```
+
 ### Using the root with Node.js
 
 Node does not use the system root store, so it won't accept mkcert certificates automatically. Instead, you will have to set the [`NODE_EXTRA_CA_CERTS`](https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file) environment variable.
