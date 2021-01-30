@@ -167,7 +167,7 @@ For Android, you will have to install the CA and then enable user roots in the d
 
 ### Windows Subsystem for Linux (WSL2)
 
-On WSL2, running `mkcert -install` will not install the rootCA in the windows certificate store. Users of WSL2 should extract the certificate (location given by `mkcert -CAROOT`) and use the Widows binary mkcert to install the rootCA.
+On WSL2, running `mkcert -install` will not install the rootCA in the Windows certificate store. Users of WSL2 should extract the certificate (location given by `mkcert -CAROOT`) and use the Windows binary mkcert to install the rootCA.
 
 To do this, copy the rootCA as a pem file to (for example) `Desktop/Certs`; run `cmd.exe` as Administrator and:
 ```
