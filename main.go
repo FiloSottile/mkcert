@@ -77,6 +77,9 @@ const advancedUsage = `Advanced options:
 	    root CA into. Options are: "system", "java" and "nss" (includes
 	    Firefox). Autodetected by default.
 
+	$OU_EXTRA_INFO (environment variable)
+	    A string which will be added to the Organizational Unit of the certificate;
+	    this is what is usually displayed as the name in trust stores.
 `
 
 // Version can be set at link time to override debug.BuildInfo.Main.Version,
