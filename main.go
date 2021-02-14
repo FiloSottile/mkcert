@@ -41,6 +41,9 @@ const shortUsage = `Usage of mkcert:
 	$ mkcert "*.example.it"
 	Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
 
+	$ mkcert -check
+	Check if the local CA is successfully installed in the system trust store. 
+
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
@@ -89,6 +92,7 @@ func main() {
 	var (
 		installFlag   = flag.Bool("install", false, "")
 		uninstallFlag = flag.Bool("uninstall", false, "")
+		checkFlag     = flag.Bool("check", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
 		clientFlag    = flag.Bool("client", false, "")
@@ -139,7 +143,7 @@ func main() {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
 	(&mkcert{
-		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
+		installMode: *installFlag, uninstallMode: *uninstallFlag, checkMode: *checkFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
@@ -149,10 +153,10 @@ const rootName = "rootCA.pem"
 const rootKeyName = "rootCA-key.pem"
 
 type mkcert struct {
-	installMode, uninstallMode bool
-	pkcs12, ecdsa, client      bool
-	keyFile, certFile, p12File string
-	csrPath                    string
+	installMode, uninstallMode, checkMode bool
+	pkcs12, ecdsa, client                 bool
+	keyFile, certFile, p12File            string
+	csrPath                               string
 
 	CAROOT string
 	caCert *x509.Certificate
@@ -196,6 +200,16 @@ func (m *mkcert) Run(args []string) {
 		}
 		if warning {
 			log.Println("Run \"mkcert -install\" for certificates to be trusted automatically ⚠️")
+
+			if m.checkMode {
+				os.Exit(1)
+			}
+		} else {
+			if m.checkMode {
+				log.Println("All good!")
+
+				os.Exit(0)
+			}
 		}
 	}
 
