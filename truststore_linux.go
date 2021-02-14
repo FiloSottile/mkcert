@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	FirefoxProfile = os.Getenv("HOME") + "/.mozilla/firefox/*"
+	FirefoxProfile = getFirefoxProfile()
 	NSSBrowsers    = "Firefox and/or Chrome/Chromium"
 
 	SystemTrustFilename string
@@ -45,6 +45,18 @@ func init() {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	}
+}
+
+func getFirefoxProfile() string {
+	var SnapFirefoxProfile = os.Getenv("HOME") + "/snap/firefox/common/.mozilla/firefox/"
+	var DefaultFirefoxProfile = os.Getenv("HOME") + "/.mozilla/firefox/*"
+	var FirefoxProfile = ""
+	if pathExists(SnapFirefoxProfile) {
+		FirefoxProfile = SnapFirefoxProfile + "*"
+	} else {
+		FirefoxProfile = DefaultFirefoxProfile
+	}
+	return FirefoxProfile
 }
 
 func (m *mkcert) systemTrustFilename() string {
