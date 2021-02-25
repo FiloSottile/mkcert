@@ -104,6 +104,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, pub, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
 
+
 	certFile, keyFile, p12File := m.fileNames(hosts)
 
 	if !m.pkcs12 {
@@ -263,6 +264,11 @@ func (m *mkcert) makeCertFromCSR() {
 	for _, uri := range csr.URIs {
 		hosts = append(hosts, uri.String())
 	}
+	
+	if len(hosts) == 0 {
+		hosts = []string{csr.Subject.CommonName}
+	}
+
 	certFile, _, _ := m.fileNames(hosts)
 
 	err = ioutil.WriteFile(certFile, pem.EncodeToMemory(
