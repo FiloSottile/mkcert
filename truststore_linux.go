@@ -35,6 +35,10 @@ func init() {
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
+	} else if pathExists("/etc/slackware-version") {
+		SystemTrustFilename = "/usr/share/ca-certificates/%s.crt"
+		SystemTrustCommand = []string{"/usr/sbin/update-ca-certificates"}
+		CertutilInstallHelp = "slackpkg install mozilla-nss"
 	} else if pathExists("/usr/local/share/ca-certificates/") {
 		SystemTrustFilename = "/usr/local/share/ca-certificates/%s.crt"
 		SystemTrustCommand = []string{"update-ca-certificates"}
@@ -44,11 +48,7 @@ func init() {
 	} else if pathExists("/usr/share/pki/trust/anchors") {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
-	} else if pathExists("/etc/slackware-release") {
-		SystemTrustFilename = "/usr/share/ca-certificates/%s.crt"
-		SystemTrustCommand = []string{"/usr/sbin/update-ca-certificates"}
-		CertutilInstallHelp = "slackpkg install mozilla-nss"
-	}
+	} 
 }
 
 func (m *mkcert) systemTrustFilename() string {
