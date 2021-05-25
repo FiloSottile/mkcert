@@ -48,7 +48,7 @@ func init() {
 	} else if pathExists("/usr/share/pki/trust/anchors") {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
-	} 
+	}
 }
 
 func (m *mkcert) systemTrustFilename() string {
