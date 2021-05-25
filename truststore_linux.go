@@ -45,7 +45,7 @@ func init() {
 		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	} else if pathExists("/etc/slackware-release") {
-		SystemTrustFilename = "/usr/share/ca-certificates"
+		SystemTrustFilename = "/usr/share/ca-certificates/%s.crt"
 		SystemTrustCommand = []string{"/usr/sbin/update-ca-certificates"}
 		CertutilInstallHelp = "slackpkg install mozilla-nss"
 	}
