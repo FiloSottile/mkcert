@@ -75,7 +75,7 @@ git clone https://github.com/FiloSottile/mkcert && cd mkcert
 go build -ldflags "-X main.Version=$(git describe --tags)"
 ```
 
-or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases). Copy the file to eg. `/usr/local/bin/mkcert` and give it execution permission with `chmod +x /usr/local/bin/mkcert`.
 
 For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x86_64/mkcert/) is available on the official Arch Linux repository.
 
