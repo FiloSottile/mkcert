@@ -375,6 +375,10 @@ func binaryExists(name string) bool {
 
 var sudoWarningOnce sync.Once
 
+func commandWithSudoNoPrompt(cmd ...string) *exec.Cmd {
+	return exec.Command("sudo", cmd...)
+}
+
 func commandWithSudo(cmd ...string) *exec.Cmd {
 	if u, err := user.Current(); err == nil && u.Uid == "0" {
 		return exec.Command(cmd[0], cmd[1:]...)
