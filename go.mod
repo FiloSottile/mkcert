@@ -1,4 +1,4 @@
-github.com/FiloSottile/mkcert
+github.com/wang-wyy/mkcert
 
 go 1.13
 
