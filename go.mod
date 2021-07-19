@@ -1,4 +1,4 @@
-module filippo.io/mkcert
+github.com/wang-wyy/mkcert
 
 go 1.13
 
