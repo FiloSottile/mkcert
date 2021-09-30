@@ -1,0 +1,11 @@
+on: [push, pull_request]
+jobs:
+  upload-windows-binary:
+      name: Upload to Winget registry
+      runs-on: windows-2019
+      steps:
+        - name: Display the path
+          run: echo ${env:test_var}
+          shell: powershell
+          env:
+            test_var: ${{ secrets.TEST_VAR }}

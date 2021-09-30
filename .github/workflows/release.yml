@@ -42,5 +42,20 @@ jobs:
                 release_id: release.data.id,
                 name: file,
                 data: await fs.readFile(file),
-              });            
+              });
             }
+  upload-windows-binary:
+    name: Upload to Winget registry
+    runs-on: windows-2019
+    steps:
+      - name: Display the path
+        run: echo ${env:test_var}
+        shell: powershell
+        env:
+          test_var: ${{ secrets.TEST_VAR }}
+    #   - powershell: |
+    #   iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+    #   .\wingetcreate.exe update FiloSottile.Mkcert -u $(packageUrls) -v $(manifestVersion) -t $(GITHUB_TOKEN)
+    # displayName: Update package manifest in the OWC
+
+
