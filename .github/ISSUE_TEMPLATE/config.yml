@@ -1,0 +1,7 @@
+contact_links:
+  - name: Question 🙋
+    url: https://github.com/FiloSottile/mkcert/discussions/new?category=q-a
+    about: Have a question about how to use mkcert?
+  - name: Feature request or suggestion
+    url: https://github.com/FiloSottile/mkcert/discussions/new?category=ideas
+    about: Wish mkcert had a feature it doesn't currently have?
