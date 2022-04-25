@@ -1,6 +1,6 @@
 ---
 name: Bug report 🐞
-about: Did mkcert not work as intended?
+about: Did mkcert not work as intended? Is it broken in a certain environment?
 title: ''
 labels: ''
 assignees: ''
