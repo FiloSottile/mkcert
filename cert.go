@@ -358,7 +358,7 @@ func (m *mkcert) newCA() {
 
 	err = ioutil.WriteFile(filepath.Join(m.CAROOT, rootName), pem.EncodeToMemory(
 		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
-	fatalIfErr(err, "failed to save CA key")
+	fatalIfErr(err, "failed to save CA certificate")
 
 	log.Printf("Created a new local CA 💥\n")
 }
