@@ -1,5 +1,7 @@
 # mkcert
 
+[简体中文](README-zh_CN.md)
+
 mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
 
 ```
