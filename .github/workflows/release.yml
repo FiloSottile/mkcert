@@ -19,7 +19,9 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 go build -o "mkcert-$(git describe --tags)-linux-arm" -ldflags "-X main.Version=$(git describe --tags)"
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o "mkcert-$(git describe --tags)-linux-arm64" -ldflags "-X main.Version=$(git describe --tags)"
           CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-darwin-amd64" -ldflags "-X main.Version=$(git describe --tags)"
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o "mkcert-$(git describe --tags)-darwin-arm64" -ldflags "-X main.Version=$(git describe --tags)"
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o "mkcert-$(git describe --tags)-windows-amd64.exe" -ldflags "-X main.Version=$(git describe --tags)"
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o "mkcert-$(git describe --tags)-windows-arm64.exe" -ldflags "-X main.Version=$(git describe --tags)"
       - name: Upload release artifacts
         uses: actions/github-script@v3
         with:
@@ -42,5 +44,5 @@ jobs:
                 release_id: release.data.id,
                 name: file,
                 data: await fs.readFile(file),
-              });            
+              });
             }

@@ -253,14 +253,16 @@ func (m *mkcert) makeCertFromCSR() {
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, csr.PublicKey, m.caKey)
 	fatalIfErr(err, "failed to generate certificate")
+	c, err := x509.ParseCertificate(cert)
+	fatalIfErr(err, "failed to parse generated certificate")
 
 	var hosts []string
-	hosts = append(hosts, csr.DNSNames...)
-	hosts = append(hosts, csr.EmailAddresses...)
-	for _, ip := range csr.IPAddresses {
+	hosts = append(hosts, c.DNSNames...)
+	hosts = append(hosts, c.EmailAddresses...)
+	for _, ip := range c.IPAddresses {
 		hosts = append(hosts, ip.String())
 	}
-	for _, uri := range csr.URIs {
+	for _, uri := range c.URIs {
 		hosts = append(hosts, uri.String())
 	}
 	certFile, _, _ := m.fileNames(hosts)
@@ -356,7 +358,7 @@ func (m *mkcert) newCA() {
 
 	err = ioutil.WriteFile(filepath.Join(m.CAROOT, rootName), pem.EncodeToMemory(
 		&pem.Block{Type: "CERTIFICATE", Bytes: cert}), 0644)
-	fatalIfErr(err, "failed to save CA key")
+	fatalIfErr(err, "failed to save CA certificate")
 
 	log.Printf("Created a new local CA 💥\n")
 }
