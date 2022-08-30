@@ -34,6 +34,8 @@ import (
 
 var userAndHostname string
 
+const certExpiryDateFormat string = "Mon Jan 2 15:04:05 2006"
+
 func init() {
 	u, err := user.Current()
 	if err == nil {
@@ -59,7 +61,7 @@ func (m *mkcert) makeCert(hosts []string) {
 	// Certificates last for 2 years and 3 months, which is always less than
 	// 825 days, the limit that macOS/iOS apply to all certificates,
 	// including custom roots. See https://support.apple.com/en-us/HT210176.
-	expiration := time.Now().AddDate(2, 3, 0)
+	expiration := m.expirationDate
 
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
@@ -142,7 +144,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\" ℹ️\n\n")
 	}
 
-	log.Printf("It will expire on %s 🗓\n\n", expiration.Format("2 January 2006"))
+	log.Printf("It will expire on %s 🗓\n\n", expiration.Format(certExpiryDateFormat))
 }
 
 func (m *mkcert) printHosts(hosts []string) {
@@ -225,7 +227,7 @@ func (m *mkcert) makeCertFromCSR() {
 	fatalIfErr(err, "failed to parse the CSR")
 	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
 
-	expiration := time.Now().AddDate(2, 3, 0)
+	expiration := m.expirationDate
 	tpl := &x509.Certificate{
 		SerialNumber:    randomSerialNumber(),
 		Subject:         csr.Subject,
@@ -275,7 +277,7 @@ func (m *mkcert) makeCertFromCSR() {
 
 	log.Printf("\nThe certificate is at \"%s\" ✅\n\n", certFile)
 
-	log.Printf("It will expire on %s 🗓\n\n", expiration.Format("2 January 2006"))
+	log.Printf("It will expire on %s 🗓\n\n", expiration.Format(certExpiryDateFormat))
 }
 
 // loadCA will load or create the CA at CAROOT.
