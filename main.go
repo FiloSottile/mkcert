@@ -23,6 +23,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"time"
 
 	"golang.org/x/net/idna"
 )
@@ -77,7 +78,16 @@ const advancedUsage = `Advanced options:
 	    root CA into. Options are: "system", "java" and "nss" (includes
 	    Firefox). Autodetected by default.
 
+	-expires DATE
+	    Customize the expiry date of the generated certificate. DATE MUST
+	    follow the "` + certExpiryDateFormat + `" format
+
 `
+
+func getDefaultExpirationDate() string {
+	expiryDate := time.Now().AddDate(2, 3, 0)
+	return expiryDate.Format(certExpiryDateFormat)
+}
 
 // Version can be set at link time to override debug.BuildInfo.Main.Version,
 // which is "(devel)" when building from within the module. See
@@ -103,6 +113,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		expiresFlag   = flag.String("expires", getDefaultExpirationDate(), "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -142,10 +153,16 @@ func main() {
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
+
+	certExpirationDate, error := time.Parse(certExpiryDateFormat, *expiresFlag)
+	if error != nil {
+		log.Fatalln("ERROR: the expiry date is not parsable, please use the format " + certExpiryDateFormat)
+		return
+	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
-		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag, expirationDate: certExpirationDate,
 	}).Run(flag.Args())
 }
 
@@ -166,6 +183,7 @@ type mkcert struct {
 	// will keep failing until the next execution. TODO: maybe execve?
 	// https://github.com/golang/go/issues/24540 (thanks, myself)
 	ignoreCheckFailure bool
+	expirationDate     time.Time
 }
 
 func (m *mkcert) Run(args []string) {
