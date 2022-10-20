@@ -11,6 +11,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"hash"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,6 +51,12 @@ func init() {
 
 		if pathExists(filepath.Join(v, "jre", "lib", "security", "cacerts")) {
 			cacertsPath = filepath.Join(v, "jre", "lib", "security", "cacerts")
+		}
+
+		// if we made it here something has to be wrong with their JAVA_HOME path
+		if cacertsPath == "" {
+			log.Printf("JAVA_HOME=%s\n", javaHome)
+			log.Fatalf("ERROR: %s", "Can't find the cacerts file, please check your JAVA_HOME is set correctly")
 		}
 	}
 }
