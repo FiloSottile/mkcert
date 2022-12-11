@@ -70,6 +70,9 @@ func (m *mkcert) makeCert(hosts []string) {
 		NotBefore: time.Now(), NotAfter: expiration,
 
 		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+
+		BasicConstraintsValid: m.isCA,
+		IsCA:                  m.isCA,
 	}
 
 	for _, h := range hosts {
@@ -229,8 +232,7 @@ func (m *mkcert) makeCertFromCSR() {
 		SerialNumber:    randomSerialNumber(),
 		Subject:         csr.Subject,
 		ExtraExtensions: csr.Extensions, // includes requested SANs, KUs and EKUs
-
-		NotBefore: time.Now(), NotAfter: expiration,
+		NotBefore:       time.Now(), NotAfter: expiration,
 
 		// If the CSR does not request a SAN extension, fix it up for them as
 		// the Common Name field does not work in modern browsers. Otherwise,
@@ -241,6 +243,9 @@ func (m *mkcert) makeCertFromCSR() {
 		// platforms require serverAuth for TLS.
 		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+
+		BasicConstraintsValid: m.isCA,
+		IsCA:                  m.isCA,
 	}
 
 	if m.client {
