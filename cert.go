@@ -228,6 +228,12 @@ func (m *mkcert) makeCertFromCSR() {
 	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
 
 	expiration := time.Now().AddDate(2, 3, 0)
+
+	keyUsage := x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature
+	if m.isCA {
+		keyUsage = x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature
+	}
+
 	tpl := &x509.Certificate{
 		SerialNumber:    randomSerialNumber(),
 		Subject:         csr.Subject,
@@ -241,8 +247,8 @@ func (m *mkcert) makeCertFromCSR() {
 
 		// Likewise, if the CSR does not set KUs and EKUs, fix it up as Apple
 		// platforms require serverAuth for TLS.
-		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		KeyUsage:    keyUsage,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 
 		BasicConstraintsValid: m.isCA,
 		IsCA:                  m.isCA,
