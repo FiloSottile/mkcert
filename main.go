@@ -65,6 +65,12 @@ const advancedUsage = `Advanced options:
 	    Generate a certificate based on the supplied CSR. Conflicts with
 	    all other flags and arguments except -install and -cert-file.
 
+	-ca
+			Generate a certificate with the CA constraint enabled.
+
+	-max-path-len LEN
+			Generate the CA certificate with path length constraint set to LEN.
+
 	-CAROOT
 	    Print the CA certificate and key storage location.
 
@@ -91,18 +97,20 @@ func main() {
 	}
 	log.SetFlags(0)
 	var (
-		installFlag   = flag.Bool("install", false, "")
-		uninstallFlag = flag.Bool("uninstall", false, "")
-		pkcs12Flag    = flag.Bool("pkcs12", false, "")
-		ecdsaFlag     = flag.Bool("ecdsa", false, "")
-		clientFlag    = flag.Bool("client", false, "")
-		helpFlag      = flag.Bool("help", false, "")
-		carootFlag    = flag.Bool("CAROOT", false, "")
-		csrFlag       = flag.String("csr", "", "")
-		certFileFlag  = flag.String("cert-file", "", "")
-		keyFileFlag   = flag.String("key-file", "", "")
-		p12FileFlag   = flag.String("p12-file", "", "")
-		versionFlag   = flag.Bool("version", false, "")
+		installFlag    = flag.Bool("install", false, "")
+		uninstallFlag  = flag.Bool("uninstall", false, "")
+		pkcs12Flag     = flag.Bool("pkcs12", false, "")
+		ecdsaFlag      = flag.Bool("ecdsa", false, "")
+		clientFlag     = flag.Bool("client", false, "")
+		helpFlag       = flag.Bool("help", false, "")
+		carootFlag     = flag.Bool("CAROOT", false, "")
+		csrFlag        = flag.String("csr", "", "")
+		certFileFlag   = flag.String("cert-file", "", "")
+		keyFileFlag    = flag.String("key-file", "", "")
+		p12FileFlag    = flag.String("p12-file", "", "")
+		caFlag         = flag.Bool("ca", false, "")
+		maxPathLenFlag = flag.Int("max-path-len", 0, "")
+		versionFlag    = flag.Bool("version", false, "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -139,13 +147,12 @@ func main() {
 	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *clientFlag) {
 		log.Fatalln("ERROR: can only combine -csr with -install and -cert-file")
 	}
-	if *csrFlag != "" && flag.NArg() != 0 {
-		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
-	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		maxPathLen: *maxPathLenFlag,
+		isCA:       *caFlag,
 	}).Run(flag.Args())
 }
 
@@ -157,6 +164,8 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
+	maxPathLen                 int
+	isCA                       bool
 
 	CAROOT string
 	caCert *x509.Certificate
