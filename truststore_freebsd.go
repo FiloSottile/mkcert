@@ -28,7 +28,7 @@ func (m *mkcert) systemTrustFilename() string {
 
 func (m *mkcert) installPlatform() bool {
 	if !pathExists(_certstore) {
-		log.Print("Unable to find FreeBSD cert system store - caroot base pkg is  missing.")
+		log.Print("FreeBSD caroot base pkg is missing.")
 		log.Printf("You can manually install the root certificate at %q.", filepath.Join(m.CAROOT, rootName))
 		return false
 	}
@@ -39,12 +39,7 @@ func (m *mkcert) installPlatform() bool {
 }
 
 func (m *mkcert) uninstallPlatform() bool {
-	legacyFilename := filepath.Join(_certstore, "rootCA.pem")
-	if !pathExists(legacyFilename) {
-		log.Print("Failed to remove root certificate.")
-		return false
-	}
-	err := os.Remove(legacyFilename)
+	err := os.Remove(filepath.Join(_certstore, "rootCA.pem"))
 	fatalIfErr(err, "failed to remove certificate")
 	return true
 }
