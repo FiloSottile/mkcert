@@ -32,6 +32,8 @@ func init() {
 		CertutilInstallHelp = "yum install nss-tools"
 	case binaryExists("zypper"):
 		CertutilInstallHelp = "zypper install mozilla-nss-tools"
+	case binaryExists("rpm-ostree"):
+		CertutilInstallHelp = "rpm-ostree install nss-tools"
 	}
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
 		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
