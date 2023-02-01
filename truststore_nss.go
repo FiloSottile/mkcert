@@ -28,6 +28,8 @@ var (
 		"/usr/bin/firefox-nightly",
 		"/usr/bin/firefox-developer-edition",
 		"/snap/firefox",
+		os.Getenv("HOME") + "/.local/share/flatpak/exports/bin/org.mozilla.firefox",
+		"/var/lib/flatpak/exports/bin/org.mozilla.firefox",
 		"/Applications/Firefox.app",
 		"/Applications/FirefoxDeveloperEdition.app",
 		"/Applications/Firefox Developer Edition.app",
