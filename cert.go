@@ -340,7 +340,8 @@ func (m *mkcert) newCA() {
 		NotAfter:  time.Now().AddDate(10, 0, 0),
 		NotBefore: time.Now(),
 
-		KeyUsage: x509.KeyUsageCertSign,
+		KeyUsage:    x509.KeyUsageCertSign,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 
 		BasicConstraintsValid: true,
 		IsCA:                  true,
