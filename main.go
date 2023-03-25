@@ -68,6 +68,10 @@ const advancedUsage = `Advanced options:
 	-CAROOT
 	    Print the CA certificate and key storage location.
 
+	-days INT
+		Generate a certificate valid for the specified number of days.
+		The default is 810, which is just under the macOS/iOS limit of 825.
+
 	$CAROOT (environment variable)
 	    Set the CA certificate and key storage location. (This allows
 	    maintaining multiple local CAs in parallel.)
@@ -103,6 +107,7 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		daysFlag      = flag.Int("days", 810, "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -146,6 +151,7 @@ func main() {
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		days: *daysFlag,
 	}).Run(flag.Args())
 }
 
@@ -157,6 +163,7 @@ type mkcert struct {
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
 	csrPath                    string
+	days                       int
 
 	CAROOT string
 	caCert *x509.Certificate
