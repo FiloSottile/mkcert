@@ -92,7 +92,7 @@ func (m *mkcert) installPlatform() bool {
 
 	plistData, err = plist.MarshalIndent(plistRoot, plist.XMLFormat, "\t")
 	fatalIfErr(err, "failed to serialize trust settings")
-	err = ioutil.WriteFile(plistFile.Name(), plistData, 0600)
+	err = os.WriteFile(plistFile.Name(), plistData, 0600)
 	fatalIfErr(err, "failed to write trust settings")
 
 	cmd = commandWithSudo("security", "trust-settings-import", "-d", plistFile.Name())
