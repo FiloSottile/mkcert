@@ -7,7 +7,6 @@ package main
 import (
 	"bytes"
 	"encoding/asn1"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,7 +56,7 @@ func (m *mkcert) installPlatform() bool {
 	// Make trustSettings explicit, as older Go does not know the defaults.
 	// https://github.com/golang/go/issues/24652
 
-	plistFile, err := ioutil.TempFile("", "trust-settings")
+	plistFile, err := os.CreateTemp("", "trust-settings")
 	fatalIfErr(err, "failed to create temp file")
 	defer os.Remove(plistFile.Name())
 
