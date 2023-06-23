@@ -7,7 +7,6 @@ package main
 import (
 	"bytes"
 	"encoding/asn1"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,7 +56,7 @@ func (m *mkcert) installPlatform() bool {
 	// Make trustSettings explicit, as older Go does not know the defaults.
 	// https://github.com/golang/go/issues/24652
 
-	plistFile, err := ioutil.TempFile("", "trust-settings")
+	plistFile, err := os.CreateTemp("", "trust-settings")
 	fatalIfErr(err, "failed to create temp file")
 	defer os.Remove(plistFile.Name())
 
@@ -65,7 +64,7 @@ func (m *mkcert) installPlatform() bool {
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-export", out)
 
-	plistData, err := ioutil.ReadFile(plistFile.Name())
+	plistData, err := os.ReadFile(plistFile.Name())
 	fatalIfErr(err, "failed to read trust settings")
 	var plistRoot map[string]interface{}
 	_, err = plist.Unmarshal(plistData, &plistRoot)
@@ -92,7 +91,7 @@ func (m *mkcert) installPlatform() bool {
 
 	plistData, err = plist.MarshalIndent(plistRoot, plist.XMLFormat, "\t")
 	fatalIfErr(err, "failed to serialize trust settings")
-	err = ioutil.WriteFile(plistFile.Name(), plistData, 0600)
+	err = os.WriteFile(plistFile.Name(), plistData, 0600)
 	fatalIfErr(err, "failed to write trust settings")
 
 	cmd = commandWithSudo("security", "trust-settings-import", "-d", plistFile.Name())
