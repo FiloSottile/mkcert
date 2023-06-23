@@ -65,7 +65,7 @@ func (m *mkcert) installPlatform() bool {
 	out, err = cmd.CombinedOutput()
 	fatalIfCmdErr(err, "security trust-settings-export", out)
 
-	plistData, err := ioutil.ReadFile(plistFile.Name())
+	plistData, err := os.ReadFile(plistFile.Name())
 	fatalIfErr(err, "failed to read trust settings")
 	var plistRoot map[string]interface{}
 	_, err = plist.Unmarshal(plistData, &plistRoot)

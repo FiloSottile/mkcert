@@ -15,7 +15,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
-	"io/ioutil"
 	"log"
 	"math/big"
 	"net"
@@ -211,7 +210,7 @@ func (m *mkcert) makeCertFromCSR() {
 		log.Fatalln("ERROR: can't create new certificates because the CA key (rootCA-key.pem) is missing")
 	}
 
-	csrPEMBytes, err := ioutil.ReadFile(m.csrPath)
+	csrPEMBytes, err := os.ReadFile(m.csrPath)
 	fatalIfErr(err, "failed to read the CSR")
 	csrPEM, _ := pem.Decode(csrPEMBytes)
 	if csrPEM == nil {
@@ -284,7 +283,7 @@ func (m *mkcert) loadCA() {
 		m.newCA()
 	}
 
-	certPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
+	certPEMBlock, err := os.ReadFile(filepath.Join(m.CAROOT, rootName))
 	fatalIfErr(err, "failed to read the CA certificate")
 	certDERBlock, _ := pem.Decode(certPEMBlock)
 	if certDERBlock == nil || certDERBlock.Type != "CERTIFICATE" {
@@ -297,7 +296,7 @@ func (m *mkcert) loadCA() {
 		return // keyless mode, where only -install works
 	}
 
-	keyPEMBlock, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootKeyName))
+	keyPEMBlock, err := os.ReadFile(filepath.Join(m.CAROOT, rootKeyName))
 	fatalIfErr(err, "failed to read the CA key")
 	keyDERBlock, _ := pem.Decode(keyPEMBlock)
 	if keyDERBlock == nil || keyDERBlock.Type != "PRIVATE KEY" {
