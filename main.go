@@ -44,6 +44,8 @@ const shortUsage = `Usage of mkcert:
 	$ mkcert -uninstall
 	Uninstall the local CA (but do not delete it).
 
+	$ mkcert 
+
 `
 
 const advancedUsage = `Advanced options:
@@ -103,6 +105,8 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		//add params of custom cert expiration time
+		certYears   = flag.Int("cert-years", 10, "10")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -146,6 +150,7 @@ func main() {
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		certYears:*certYears,
 	}).Run(flag.Args())
 }
 
@@ -166,6 +171,8 @@ type mkcert struct {
 	// will keep failing until the next execution. TODO: maybe execve?
 	// https://github.com/golang/go/issues/24540 (thanks, myself)
 	ignoreCheckFailure bool
+	//add params of custom cert expiration time
+	certYears int
 }
 
 func (m *mkcert) Run(args []string) {
@@ -204,7 +211,9 @@ func (m *mkcert) Run(args []string) {
 	}
 
 	if m.csrPath != "" {
-		m.makeCertFromCSR()
+		//m.makeCertFromCSR()
+		//add params of custom cert expiration time
+		m.makeCertFromCSRCustom(m.certYears)
 		return
 	}
 
@@ -234,7 +243,9 @@ func (m *mkcert) Run(args []string) {
 		}
 	}
 
-	m.makeCert(args)
+	//m.makeCert(args)
+	//add params of custom cert expiration time
+	m.makeCertCustom(args,m.certYears)
 }
 
 func getCAROOT() string {
