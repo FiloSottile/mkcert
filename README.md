@@ -68,6 +68,12 @@ Then you can install using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-
 brew install mkcert
 ```
 
+or install using [bin](https://github.com/marcosnils/bin)
+
+```
+bin install https://github.com/FiloSottile/mkcert
+```
+
 or build from source (requires Go 1.13+)
 
 ```
