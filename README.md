@@ -2,7 +2,7 @@
 
 mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
 
-```
+```sh
 $ mkcert -install
 Created a new local CA 💥
 The local CA is now installed in the system trust store! ⚡️
@@ -29,91 +29,177 @@ mkcert automatically creates and installs a local CA in the system root store, a
 
 ## Installation
 
-> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+> [!WARNING]
+> **Do not share the `rootCA-key.pem` file!** This file gives complete power to intercept secure requests from your machine.
 
-### macOS
+<details>
+<summary><b>macOS</b></summary>
 
-On macOS, use [Homebrew](https://brew.sh/)
+<details>
+<summary>Homebrew</summary>
 
-```
+See [Homebrew](https://brew.sh/).
+
+```sh
 brew install mkcert
-brew install nss # if you use Firefox
+# If you use Firefox:
+brew install nss
 ```
+</details>
 
-or [MacPorts](https://www.macports.org/).
+<details>
+<summary>MacPorts</summary>
 
-```
+See [MacPorts](https://www.macports.org).
+
+```sh
 sudo port selfupdate
 sudo port install mkcert
-sudo port install nss # if you use Firefox
+# If you use Firefox:
+sudo port install nss
 ```
+</details>
 
-### Linux
+</details>
 
-On Linux, first install `certutil`.
+<details>
+<summary><b>Linux</b></summary>
 
-```
+<details>
+<summary>APT (Debian, Ubuntu, ...)</summary>
+
+First, install `certutil`:
+
+```sh
 sudo apt install libnss3-tools
-    -or-
-sudo yum install nss-tools
-    -or-
+```
+
+Then, install `mkcert`:
+
+```sh
+sudo apt install mkcert 
+```
+</details>
+
+<details>
+<summary>pacman (Arch, ...)</summary>
+
+First, install `certutil`:
+
+```sh
 sudo pacman -S nss
-    -or-
+```
+
+Then, install `mkcert`:
+
+```sh
+sudo pacman -Syu mkcert
+```
+</details>
+
+<details>
+<summary>Yum (Fedora, ...)</summary>
+
+First, install `certutil`:
+
+```sh
+sudo yum install nss-tools
+```
+
+Then, follow the [alternative steps below](#linux-alternative).
+</details>
+
+<details>
+<summary>Zypper (openSUSE, ...)</summary>
+
+First, install `certutil`:
+
+```sh
 sudo zypper install mozilla-nss-tools
 ```
 
-Then you can install using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux)
+Then, follow the [alternative steps below](#linux-alternative).
+</details>
 
-```
+#### Linux (Alternative)
+
+<details>
+<summary>Homebrew on Linux</summary>
+
+See [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux).
+
+```sh
 brew install mkcert
 ```
+</details>
 
-If brew command is not working on linux, in the case of Ubuntu or other Debian-based distributions, you can use the apt package manager to install mkcert. Here's the command you can use:
+<details>
+<summary>Build from source (requires Go 1.13+)</summary>
 
-```
-sudo apt update 
-sudo apt install mkcert 
-```
-
-or build from source (requires Go 1.13+)
-
-```
-git clone https://github.com/FiloSottile/mkcert && cd mkcert
+```sh
+git clone https://github.com/FiloSottile/mkcert
+cd mkcert
 go build -ldflags "-X main.Version=$(git describe --tags)"
 ```
+</details>
 
-or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+<details>
+<summary>Use pre-built binaries</summary>
 
-```
+See [pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+
+```sh
 curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 ```
+</details>
 
-For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x86_64/mkcert/) is available on the official Arch Linux repository.
+</details>
 
-```
-sudo pacman -Syu mkcert
-```
+<details>
+<summary><b>Windows</b></summary>
 
-### Windows
+<details>
+<summary>Chocolatey</summary>
 
-On Windows, use [Chocolatey](https://chocolatey.org)
+See [Chocolatey](https://chocolatey.org).
 
-```
+```sh
 choco install mkcert
 ```
+</details>
 
-or use Scoop
+<details>
+<summary>Scoop</summary>
 
-```
+See [Scoop](https://scoop.sh/).
+
+```sh
 scoop bucket add extras
 scoop install mkcert
 ```
+</details>
 
-or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+#### Windows (Alternative)
+
+<details>
+<summary>Build from source (requires Go 1.10+)</summary>
+
+```sh
+<not documented yet>
+```
+</details>
+
+<details>
+<summary>Use pre-built binaries</summary>
+
+See [pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+</details>
 
 If you're running into permission problems try running `mkcert` as an Administrator.
+
+</details>
 
 ## Supported root stores
 
