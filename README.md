@@ -89,6 +89,13 @@ For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x8
 sudo pacman -Syu mkcert
 ```
 
+If you prefer building an running mkcert in a docker container
+
+```
+docker build . -t mkcert
+docker run -it --rm --user $UID -v $PWD:/tmp/certs mkcert localhost 127.0.0.1 ::1
+```
+
 ### Windows
 
 On Windows, use [Chocolatey](https://chocolatey.org)
@@ -112,15 +119,15 @@ If you're running into permission problems try running `mkcert` as an Administra
 
 mkcert supports the following root stores:
 
-* macOS system store
-* Windows system store
-* Linux variants that provide either
-    * `update-ca-trust` (Fedora, RHEL, CentOS) or
-    * `update-ca-certificates` (Ubuntu, Debian, OpenSUSE, SLES) or
-    * `trust` (Arch)
-* Firefox (macOS and Linux only)
-* Chrome and Chromium
-* Java (when `JAVA_HOME` is set)
+- macOS system store
+- Windows system store
+- Linux variants that provide either
+  - `update-ca-trust` (Fedora, RHEL, CentOS) or
+  - `update-ca-certificates` (Ubuntu, Debian, OpenSUSE, SLES) or
+  - `trust` (Arch)
+- Firefox (macOS and Linux only)
+- Chrome and Chromium
+- Java (when `JAVA_HOME` is set)
 
 To only install the local root CA into a subset of them, you can set the `TRUST_STORES` environment variable to a comma-separated list. Options are: "system", "java" and "nss" (includes Firefox).
 
@@ -189,9 +196,9 @@ If you want to manage separate CAs, you can use the environment variable `$CAROO
 
 Installing in the trust store does not require the CA key, so you can export the CA certificate and use mkcert to install it in other machines.
 
-* Look for the `rootCA.pem` file in `mkcert -CAROOT`
-* copy it to a different machine
-* set `$CAROOT` to its directory
-* run `mkcert -install`
+- Look for the `rootCA.pem` file in `mkcert -CAROOT`
+- copy it to a different machine
+- set `$CAROOT` to its directory
+- run `mkcert -install`
 
-Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
+Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should _not_ export or share `rootCA-key.pem`.
