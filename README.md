@@ -89,6 +89,13 @@ For Arch Linux users, [`mkcert`](https://www.archlinux.org/packages/community/x8
 sudo pacman -Syu mkcert
 ```
 
+If you prefer building an running mkcert in a docker container
+
+```
+docker build . -t mkcert
+docker run -it --rm --user $UID -v $PWD:/tmp/certs mkcert localhost 127.0.0.1 ::1
+```
+
 ### Windows
 
 On Windows, use [Chocolatey](https://chocolatey.org)
