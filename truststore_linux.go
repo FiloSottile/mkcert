@@ -15,8 +15,11 @@ import (
 )
 
 var (
-	FirefoxProfiles = []string{os.Getenv("HOME") + "/.mozilla/firefox/*",
-		os.Getenv("HOME") + "/snap/firefox/common/.mozilla/firefox/*"}
+	FirefoxProfiles = []string{
+		os.Getenv("HOME") + "/.mozilla/firefox/*",
+		os.Getenv("HOME") + "/.mozilla/firefox-esr/*",
+		os.Getenv("HOME") + "/snap/firefox/common/.mozilla/firefox/*",
+	}
 	NSSBrowsers = "Firefox and/or Chrome/Chromium"
 
 	SystemTrustFilename string
