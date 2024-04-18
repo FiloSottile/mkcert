@@ -195,3 +195,25 @@ Installing in the trust store does not require the CA key, so you can export the
 * run `mkcert -install`
 
 Remember that mkcert is meant for development purposes, not production, so it should not be used on end users' machines, and that you should *not* export or share `rootCA-key.pem`.
+
+### Using mkcert with Vite
+
+If you use Vite, you'll need to modify the vite.config.js (or vite.config.ts if you're using TypeScript) to include the HTTPS configuration. 
+
+```
+import fs from 'fs';
+import path from 'path';
+
+export default {
+  server: {
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'path/to/example-key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'path/to/example.pem')),
+    },
+    // Make sure the server is accessible over the local network
+    host: '0.0.0.0',
+  },
+};
+```
+
+Replace 'path/to/example-key.pem' and 'path/to/example.pem' with the paths to your certificate files.
