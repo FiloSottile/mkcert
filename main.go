@@ -389,5 +389,6 @@ func commandWithSudo(cmd ...string) *exec.Cmd {
 		})
 		return exec.Command(cmd[0], cmd[1:]...)
 	}
-	return exec.Command("sudo", append([]string{"--prompt=Sudo password:", "--"}, cmd...)...)
+	log.Println("Re-running with sudo (your password will not be processed or saved by mkcert)")
+	return exec.Command("sudo", append([]string{"--"}, cmd...)...)
 }
