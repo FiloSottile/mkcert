@@ -29,7 +29,7 @@ var (
 	procCertDeleteCertificateFromStore   = modcrypt32.NewProc("CertDeleteCertificateFromStore")
 	procCertDuplicateCertificateContext  = modcrypt32.NewProc("CertDuplicateCertificateContext")
 	procCertEnumCertificatesInStore      = modcrypt32.NewProc("CertEnumCertificatesInStore")
-	procCertOpenSystemStoreW             = modcrypt32.NewProc("CertOpenSystemStoreW")
+	procCertOpenStore                    = modcrypt32.NewProc("CertOpenStore")
 )
 
 func (m *mkcert) installPlatform() bool {
@@ -73,7 +73,16 @@ func openWindowsRootStore() (windowsRootStore, error) {
 	if err != nil {
 		return 0, err
 	}
-	store, _, err := procCertOpenSystemStoreW.Call(0, uintptr(unsafe.Pointer(rootStr)))
+	store, _, err := procCertOpenStore.Call(
+		10,                                                              // LPCSTR lpszStoreProvider (CERT_STORE_PROV_SYSTEM_W is 10)
+		0,                                                               // DWORD dwEncodingType
+		0,                                                               // HCRYPTPROV_LEGACY hCryptProv
+		0x00020000 | // CERT_SYSTEM_STORE_LOCAL_MACHINE
+		0x00004000 | // CERT_STORE_OPEN_EXISTING_FLAG
+		0x00001000 | // CERT_STORE_MAXIMUM_ALLOWED_FLAG
+		0x00000004,  // CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG      // DWORD dwFlags
+		uintptr(unsafe.Pointer(rootStr)),                                // const void *pvPara
+	)
 	if store != 0 {
 		return windowsRootStore(store), nil
 	}
