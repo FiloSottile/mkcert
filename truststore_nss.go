@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 var (
@@ -89,8 +90,23 @@ func (m *mkcert) checkNSS() bool {
 func (m *mkcert) installNSS() bool {
 	if m.forEachNSSProfile(func(profile string) {
 		cmd := exec.Command(certutilPath, "-A", "-d", profile, "-t", "C,,", "-n", m.caUniqueName(), "-i", filepath.Join(m.CAROOT, rootName))
-		out, err := execCertutil(cmd)
-		fatalIfCmdErr(err, "certutil -A -d "+profile, out)
+
+		// Wait for cmd incase a password prompt is given
+		errChan := make(chan error)
+		timeout := time.After(1 * time.Second)
+		go func() {
+			out, err := execCertutil(cmd)
+			fatalIfCmdErr(err, "certutil -A -d "+profile, out)
+			errChan <- err
+		}()
+		for { // block until errChan gets a result
+			select {
+			case <-errChan:
+				return // next profile
+			case <-timeout:
+				log.Print("\n(hint, this is your Firefox primary password)")
+			}
+		}
 	}) == 0 {
 		log.Printf("ERROR: no %s security databases found", NSSBrowsers)
 		return false
