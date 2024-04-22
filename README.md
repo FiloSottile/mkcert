@@ -68,6 +68,13 @@ Then you can install using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-
 brew install mkcert
 ```
 
+If brew command is not working on linux, in the case of Ubuntu or other Debian-based distributions, you can use the apt package manager to install mkcert. Here's the command you can use:
+
+```
+sudo apt update 
+sudo apt install mkcert 
+```
+
 or build from source (requires Go 1.13+)
 
 ```
