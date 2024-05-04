@@ -56,10 +56,15 @@ func (m *mkcert) makeCert(hosts []string) {
 	fatalIfErr(err, "failed to generate certificate key")
 	pub := priv.(crypto.Signer).Public()
 
-	// Certificates last for 2 years and 3 months, which is always less than
-	// 825 days, the limit that macOS/iOS apply to all certificates,
-	// including custom roots. See https://support.apple.com/en-us/HT210176.
-	expiration := time.Now().AddDate(2, 3, 0)
+  // IMPORTANT(jeff): Generate a certificate with a validity no more than
+  // thirteen months (397 days) from today, in order to not trip SSL
+  // certificate checks on Android 11 with the error
+  // NET::ERR_CERT_VALIDITY_TOO_LONG
+  //
+  // See also,
+  // 1. https://support.apple.com/en-us/HT210176
+  // 2. https://stackoverflow.com/questions/64597721/neterr-cert-validity-too-long-the-server-certificate-has-a-validity-period-t
+	expiration := time.Now().AddDate(0, 13, 0)
 
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
@@ -225,7 +230,15 @@ func (m *mkcert) makeCertFromCSR() {
 	fatalIfErr(err, "failed to parse the CSR")
 	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
 
-	expiration := time.Now().AddDate(2, 3, 0)
+  // IMPORTANT(jeff): Generate a certificate with a validity no more than
+  // thirteen months (397 days) from today, in order to not trip SSL
+  // certificate checks on Android 11 with the error
+  // NET::ERR_CERT_VALIDITY_TOO_LONG
+  //
+  // See also,
+  // 1. https://support.apple.com/en-us/HT210176
+  // 2. https://stackoverflow.com/questions/64597721/neterr-cert-validity-too-long-the-server-certificate-has-a-validity-period-t
+	expiration := time.Now().AddDate(0, 13, 0)
 	tpl := &x509.Certificate{
 		SerialNumber:    randomSerialNumber(),
 		Subject:         csr.Subject,
