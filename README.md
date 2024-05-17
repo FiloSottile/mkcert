@@ -91,13 +91,19 @@ sudo pacman -Syu mkcert
 
 ### Windows
 
-On Windows, use [Chocolatey](https://chocolatey.org)
+On Windows, use [Winget](https://winget.run/pkg/FiloSottile/mkcert)
+
+```
+winget install -e --id FiloSottile.mkcert
+```
+
+or use [Chocolatey](https://chocolatey.org)
 
 ```
 choco install mkcert
 ```
 
-or use Scoop
+or use [Scoop](https://scoop.sh/)
 
 ```
 scoop bucket add extras
