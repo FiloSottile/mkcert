@@ -78,7 +78,7 @@ go build -ldflags "-X main.Version=$(git describe --tags)"
 or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ```
-arch=$(uname -m); if [ "$arch" = "x86_64" ]; then arch="amd64"; else arch="arm64"; fi && curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/$arch"
+arch=$(uname -m); if [ "$arch" = "x86_64" ]; then arch="amd64"; elif [ "$arch" = "armv7l" ]; then arch="arm"; else arch="arm64"; fi && curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/$arch"
 chmod +x mkcert-v*-linux-a*64
 sudo cp mkcert-v*-linux-a*64 /usr/local/bin/mkcert
 ```
