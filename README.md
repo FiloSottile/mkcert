@@ -79,8 +79,8 @@ or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 ```
 arch=$(uname -m); if [ "$arch" = "x86_64" ]; then arch="amd64"; elif [ "$arch" = "armv7l" ]; then arch="arm"; else arch="arm64"; fi && curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/$arch"
-chmod +x mkcert-v*-linux-a*64
-sudo cp mkcert-v*-linux-a*64 /usr/local/bin/mkcert
+chmod +x mkcert-v*-linux-a*
+sudo cp mkcert-v*-linux-a* /usr/local/bin/mkcert
 ```
 
 For Arch Linux users, [`mkcert`](https://archlinux.org/packages/extra/x86_64/mkcert/) is available on the official Arch Linux repository.
