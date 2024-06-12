@@ -48,6 +48,12 @@ sudo port install mkcert
 sudo port install nss # if you use Firefox
 ```
 
+or [Flox](https://flox.dev).
+
+```
+flox install mkcert
+```
+
 ### Linux
 
 On Linux, first install `certutil`.
@@ -87,6 +93,12 @@ For Arch Linux users, [`mkcert`](https://archlinux.org/packages/extra/x86_64/mkc
 
 ```
 sudo pacman -Syu mkcert
+```
+
+For Flox users, `mkcert` can be installed into a Flox environment.
+
+```
+flox install mkcert
 ```
 
 ### Windows
