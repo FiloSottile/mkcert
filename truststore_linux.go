@@ -19,6 +19,7 @@ var (
 		os.Getenv("HOME") + "/snap/firefox/common/.mozilla/firefox/*"}
 	NSSBrowsers = "Firefox and/or Chrome/Chromium"
 
+	SystemTrustDirectory string
 	SystemTrustFilename string
 	SystemTrustCommand  []string
 	CertutilInstallHelp string
@@ -34,22 +35,32 @@ func init() {
 		CertutilInstallHelp = "zypper install mozilla-nss-tools"
 	}
 	if pathExists("/etc/pki/ca-trust/source/anchors/") {
-		SystemTrustFilename = "/etc/pki/ca-trust/source/anchors/%s.pem"
+		SystemTrustDirectory = "/etc/pki/ca-trust/source/anchors/"
+		SystemTrustFilename = "%s.pem"
 		SystemTrustCommand = []string{"update-ca-trust", "extract"}
+	} else if pathExists("/etc/slackware-version") {
+		SystemTrustDirectory = "/usr/local/share/ca-certificates/"
+		SystemTrustFilename = "%s.crt"
+		SystemTrustCommand = []string{"/usr/sbin/update-ca-certificates"}
+		CertutilInstallHelp = "slackpkg install mozilla-nss"
 	} else if pathExists("/usr/local/share/ca-certificates/") {
-		SystemTrustFilename = "/usr/local/share/ca-certificates/%s.crt"
+		SystemTrustDirectory = "/usr/local/share/ca-certificates/"
+		SystemTrustFilename = "%s.crt"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	} else if pathExists("/etc/ca-certificates/trust-source/anchors/") {
-		SystemTrustFilename = "/etc/ca-certificates/trust-source/anchors/%s.crt"
+		SystemTrustDirectory = "/etc/ca-certificates/trust-source/anchors/"
+		SystemTrustFilename = "%s.crt"
 		SystemTrustCommand = []string{"trust", "extract-compat"}
-	} else if pathExists("/usr/share/pki/trust/anchors") {
-		SystemTrustFilename = "/usr/share/pki/trust/anchors/%s.pem"
+	} else if pathExists("/usr/share/pki/trust/anchors/") {
+		SystemTrustDirectory = "/usr/share/pki/trust/anchors/"
+		SystemTrustFilename = "%s.pem"
 		SystemTrustCommand = []string{"update-ca-certificates"}
 	}
 }
 
 func (m *mkcert) systemTrustFilename() string {
-	return fmt.Sprintf(SystemTrustFilename, strings.Replace(m.caUniqueName(), " ", "_", -1))
+	
+	return filepath.Join(SystemTrustDirectory, fmt.Sprintf(SystemTrustFilename, strings.Replace(m.caUniqueName(), " ", "_", -1)))
 }
 
 func (m *mkcert) installPlatform() bool {
@@ -57,6 +68,11 @@ func (m *mkcert) installPlatform() bool {
 		log.Printf("Installing to the system store is not yet supported on this Linux 😣 but %s will still work.", NSSBrowsers)
 		log.Printf("You can also manually install the root certificate at %q.", filepath.Join(m.CAROOT, rootName))
 		return false
+	}
+	if !pathExists(SystemTrustDirectory) {
+	    md := commandWithSudo("mkdir", SystemTrustDirectory)
+	    out, err := md.CombinedOutput()
+	    fatalIfCmdErr(err, "mkdir", out)
 	}
 
 	cert, err := ioutil.ReadFile(filepath.Join(m.CAROOT, rootName))
