@@ -389,5 +389,5 @@ func commandWithSudo(cmd ...string) *exec.Cmd {
 		})
 		return exec.Command(cmd[0], cmd[1:]...)
 	}
-	return exec.Command("sudo", append([]string{"--prompt=Sudo password:", "--"}, cmd...)...)
+	return exec.Command("sudo", append([]string{"--prompt=mkcert will now install certificates into your root certificate store.\nEnter your sudo password:", "--"}, cmd...)...)
 }
