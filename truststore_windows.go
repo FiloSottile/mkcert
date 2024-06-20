@@ -110,7 +110,9 @@ func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
 	deletedAny := false
 	for {
 		// Next enum
-		certPtr, _, err := procCertEnumCertificatesInStore.Call(uintptr(w), uintptr(unsafe.Pointer(cert)))
+		certUptr, _, err := procCertEnumCertificatesInStore.Call(uintptr(w), uintptr(unsafe.Pointer(cert)))
+		// Appease vet, see https://github.com/golang/go/issues/58625
+		certPtr := *(*unsafe.Pointer)(unsafe.Pointer(&certUptr))
 		if cert = (*syscall.CertContext)(unsafe.Pointer(certPtr)); cert == nil {
 			if errno, ok := err.(syscall.Errno); ok && errno == 0x80092004 {
 				break
