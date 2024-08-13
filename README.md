@@ -89,6 +89,18 @@ For Arch Linux users, [`mkcert`](https://archlinux.org/packages/extra/x86_64/mkc
 sudo pacman -Syu mkcert
 ```
 
+For Debian users, [`mkcert`](https://tracker.debian.org/pkg/mkcert) is available on the main archive since Bookworm.
+
+```
+sudo apt install mkcert
+```
+
+For Ubuntu users, [`mkcert`](https://launchpad.net/ubuntu/+source/mkcert) is available on the main archive since Jammy.
+
+```
+sudo apt install mkcert
+```
+
 ### Windows
 
 On Windows, use [Chocolatey](https://chocolatey.org)
