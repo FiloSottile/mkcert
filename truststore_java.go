@@ -25,7 +25,7 @@ var (
 	javaHome    string
 	cacertsPath string
 	keytoolPath string
-	storePass   string = "changeit"
+	storePass   = "changeit"
 )
 
 func init() {
