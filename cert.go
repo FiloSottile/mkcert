@@ -59,13 +59,28 @@ func (m *mkcert) makeCert(hosts []string) {
 	// Certificates last for 2 years and 3 months, which is always less than
 	// 825 days, the limit that macOS/iOS apply to all certificates,
 	// including custom roots. See https://support.apple.com/en-us/HT210176.
-	expiration := time.Now().AddDate(2, 3, 0)
+	expiration := time.Now().AddDate(0, 0, m.certDays)
+
+	certOrg := "mkcert development certificate"
+	certOrgUnit := userAndHostname
+	certCommonName := hosts[0]
+
+    if m.certOrg != "" {
+        certOrg = m.certOrg
+    }
+    if m.certOrgUnit != "" {
+        certOrgUnit = m.certOrgUnit
+    }
+    if m.certCommonName != "" {
+        certCommonName = m.certCommonName
+    }
 
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
-			Organization:       []string{"mkcert development certificate"},
-			OrganizationalUnit: []string{userAndHostname},
+			Organization:       []string{certOrg},
+			OrganizationalUnit: []string{certOrgUnit},
+			CommonName: certCommonName,
 		},
 
 		NotBefore: time.Now(), NotAfter: expiration,
@@ -324,20 +339,34 @@ func (m *mkcert) newCA() {
 
 	skid := sha1.Sum(spki.SubjectPublicKey.Bytes)
 
+	caOrg := "mkcert development CA"
+	caOrgUnit := userAndHostname
+	caCommonName := "mkcert " + userAndHostname
+
+    if m.caOrg != "" {
+        caOrg = m.caOrg
+    }
+    if m.caOrgUnit != "" {
+        caOrgUnit = m.caOrgUnit
+    }
+    if m.caCommonName != "" {
+        caCommonName = m.caCommonName
+    }
+
 	tpl := &x509.Certificate{
 		SerialNumber: randomSerialNumber(),
 		Subject: pkix.Name{
-			Organization:       []string{"mkcert development CA"},
-			OrganizationalUnit: []string{userAndHostname},
+			Organization:       []string{caOrg},
+			OrganizationalUnit: []string{caOrgUnit},
 
 			// The CommonName is required by iOS to show the certificate in the
 			// "Certificate Trust Settings" menu.
 			// https://github.com/FiloSottile/mkcert/issues/47
-			CommonName: "mkcert " + userAndHostname,
+			CommonName: caCommonName,
 		},
 		SubjectKeyId: skid[:],
 
-		NotAfter:  time.Now().AddDate(10, 0, 0),
+		NotAfter:  time.Now().AddDate(m.caYears, 0, 0),
 		NotBefore: time.Now(),
 
 		KeyUsage: x509.KeyUsageCertSign,

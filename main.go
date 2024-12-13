@@ -102,6 +102,17 @@ func main() {
 		certFileFlag  = flag.String("cert-file", "", "")
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
+		// certInfo
+		certOrgFlag   = flag.String("cert-org", "", "")
+		certOrgUnitFlag   = flag.String("cert-orgUnit", "", "")
+		certCommonNameFlag   = flag.String("cert-commonName", "", "")
+		certDaysFlag   = flag.Int("ca-days", 825, "")
+		// caInfo
+		caOrgFlag   = flag.String("ca-org", "", "")
+		caOrgUnitFlag   = flag.String("ca-orgUnit", "", "")
+		caCommonNameFlag   = flag.String("ca-commonName", "", "")
+		caYearsFlag   = flag.Int("ca-years", 10, "")
+
 		versionFlag   = flag.Bool("version", false, "")
 	)
 	flag.Usage = func() {
@@ -146,6 +157,8 @@ func main() {
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		certOrg: *certOrgFlag, certOrgUnit: *certOrgUnitFlag, certCommonName: *certCommonNameFlag, certDays: *certDaysFlag,
+		caOrg: *caOrgFlag, caOrgUnit: *caOrgUnitFlag, caCommonName: *caCommonNameFlag, caYears: *caYearsFlag,
 	}).Run(flag.Args())
 }
 
@@ -156,6 +169,10 @@ type mkcert struct {
 	installMode, uninstallMode bool
 	pkcs12, ecdsa, client      bool
 	keyFile, certFile, p12File string
+	certOrg, certOrgUnit, certCommonName string
+	certDays int
+	caOrg, caOrgUnit, caCommonName string
+	caYears int
 	csrPath                    string
 
 	CAROOT string
