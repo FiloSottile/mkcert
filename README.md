@@ -104,6 +104,12 @@ scoop bucket add extras
 scoop install mkcert
 ```
 
+or use [Winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/)
+
+```
+winget install -e --id FiloSottile.mkcert
+```
+
 or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 If you're running into permission problems try running `mkcert` as an Administrator.
