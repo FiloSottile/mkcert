@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	hasJava    bool
-	hasKeytool bool
+	hasJava        bool
+	hasKeytool     bool
+	hasCAcertsPath bool
 
 	javaHome    string
 	cacertsPath string
@@ -45,10 +46,12 @@ func init() {
 		}
 
 		if pathExists(filepath.Join(v, "lib", "security", "cacerts")) {
+			hasCAcertsPath = true
 			cacertsPath = filepath.Join(v, "lib", "security", "cacerts")
 		}
 
 		if pathExists(filepath.Join(v, "jre", "lib", "security", "cacerts")) {
+			hasCAcertsPath = true
 			cacertsPath = filepath.Join(v, "jre", "lib", "security", "cacerts")
 		}
 	}
@@ -56,6 +59,10 @@ func init() {
 
 func (m *mkcert) checkJava() bool {
 	if !hasKeytool {
+		return false
+	}
+
+	if !hasCAcertsPath {
 		return false
 	}
 
