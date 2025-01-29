@@ -124,6 +124,10 @@ mkcert supports the following root stores:
 
 To only install the local root CA into a subset of them, you can set the `TRUST_STORES` environment variable to a comma-separated list. Options are: "system", "java" and "nss" (includes Firefox).
 
+### Manually-supported root stores
+
+* NixOS Linux: Add to configuration.nix: `security.pki.certificateFiles = [ /home/USER/.local/share/mkcert/rootCA.pem ]; # for local development via SSL`
+
 ## Advanced topics
 
 ### Advanced options
@@ -167,9 +171,15 @@ mkcert filippo@example.com
 
 For the certificates to be trusted on mobile devices, you will have to install the root CA. It's the `rootCA.pem` file in the folder printed by `mkcert -CAROOT`.
 
+#### iOS
+
 On iOS, you can either use AirDrop, email the CA to yourself, or serve it from an HTTP server. After opening it, you need to [install the profile in Settings > Profile Downloaded](https://github.com/FiloSottile/mkcert/issues/233#issuecomment-690110809) and then [enable full trust in it](https://support.apple.com/en-nz/HT204477).
 
-For Android, you will have to install the CA and then enable user roots in the development build of your app. See [this StackOverflow answer](https://stackoverflow.com/a/22040887/749014).
+#### Android
+
+Save `rootCA.pem` in any folder *other than* Downloads.  Then go to "System Settings : Security & privacy : Mores security & privacy : Encryption & credentials : Install a certificate : CA certificate".  Select "Install anyway" and select `rootCA.pem`.
+
+You may also need to enable user roots in the development build of your app. See [this StackOverflow answer](https://stackoverflow.com/a/22040887/749014).
 
 ### Using the root with Node.js
 
