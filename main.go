@@ -136,8 +136,8 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
-	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *clientFlag) {
-		log.Fatalln("ERROR: can only combine -csr with -install and -cert-file")
+	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag) {
+		log.Fatalln("ERROR: can only combine -csr with -install, -client and -cert-file")
 	}
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
