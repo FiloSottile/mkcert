@@ -62,7 +62,15 @@ sudo pacman -S nss
 sudo zypper install mozilla-nss-tools
 ```
 
-Then you can install using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux)
+Then you can install `mkcert`
+
+using apt [mkcert](https://launchpad.net/ubuntu/+source/mkcert):
+
+```
+sudo apt install mkcert
+```
+
+using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux)
 
 ```
 brew install mkcert
