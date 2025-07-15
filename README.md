@@ -29,7 +29,8 @@ mkcert automatically creates and installs a local CA in the system root store, a
 
 ## Installation
 
-> **Warning**: the `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. Do not share it.
+> [!WARNING]
+> The `rootCA-key.pem` file that mkcert automatically generates gives complete power to intercept secure requests from your machine. **Do not share it.**
 
 ### macOS
 
