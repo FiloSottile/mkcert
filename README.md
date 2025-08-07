@@ -68,7 +68,7 @@ Then you can install using [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-
 brew install mkcert
 ```
 
-or build from source (requires Go 1.13+)
+or build from source (requires Go 1.23+)
 
 ```
 git clone https://github.com/FiloSottile/mkcert && cd mkcert
@@ -104,7 +104,7 @@ scoop bucket add extras
 scoop install mkcert
 ```
 
-or build from source (requires Go 1.10+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
+or build from source (requires Go 1.23+), or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 
 If you're running into permission problems try running `mkcert` as an Administrator.
 

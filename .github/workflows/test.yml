@@ -10,11 +10,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go ${{ matrix.go }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: 1.x
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Run staticcheck
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@latest
