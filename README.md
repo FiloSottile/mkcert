@@ -50,6 +50,32 @@ sudo port install nss # if you use Firefox
 
 ### Linux
 
+#### Package provided by Linux distribuitions
+
+Various Linux distributions have packaged mkcert, check the following table if your Linux distribution provides a package and how it can be installed.
+
+Linux distribution | Package                                                           | How to install
+-------------------|-------------------------------------------------------------------|----------------------------------------------------------
+Alpine             | [mkcert](https://pkgs.alpinelinux.org/packages?name=mkcert)       | `sudo apk add mkcert`
+Alt                | [mkcert](https://packages.altlinux.org/en/sisyphus/srpms/mkcert/) | `sudo apt-get install mkcert`
+Arch               | [mkcert](https://archlinux.org/packages/extra/x86_64/mkcert/)     | `sudo pacman -Syu mkcert`
+Debian             | [mkcert](https://packages.debian.org/sid/source/mkcert)           | `sudo apt-get install mkcert`
+Fedora             | [mkcert](https://packages.fedoraproject.org/pkgs/mkcert/mkcert/)  | `sudo dnf install -y mkcert`
+Gentoo             | [app-misc/mkcert](https://packages.gentoo.org/packages/app-misc/mkcert) | `sudo emerge app-misc/mkcert`
+Homebrew           | [mkcert](https://formulae.brew.sh/formula/mkcert)                 | `sudo brew install mkcert`
+Kali               | [mkcert](https://pkg.kali.org/pkg/mkcert)                         | `sudo apt install mkcert`
+LiGurOS            | [app-misc/mkcert](https://gitlab.com/liguros/liguros-repo/-/tree/stable/app-misc/mkcert) | `sudo emerge app-misc/mkcert`
+MPR                | [mkcert-bin](https://mpr.makedeb.org/packages/mkcert-bin)         | `sudo mist install mkcert-bin`
+Nix                | [mkcert](https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/mk/mkcert/package.nix) | `sudo nix-shell -p mkcert`
+OpenSUSE           | [mkcert](https://build.opensuse.org/package/show/openSUSE:Factory/mkcert) | `sudo zypper install mkcert`
+Parabola           | [mkcert](https://www.parabola.nu/packages/extra/x86_64/mkcert/)   | `sudo pacman -Syu mkcert`
+PureOS             | [mkcert](https://software.pureos.net/package/src/pureos/landing/mkcert) | `sudo apt-get install mkcert`
+T2 SDE             | [mkcert](https://t2linux.com/packages/mkcert)                     | `sudo apt-get install mkcert`
+Trisquel           | [mkcert](https://packages.trisquel.org/source/aramo/mkcert)       | `sudo apt-get install mkcert`
+Ubuntu             | [mkcert](https://packages.ubuntu.com/source/questing/mkcert)      | `sudo apt-get install mkcert`
+
+#### Manually
+
 On Linux, first install `certutil`.
 
 ```
@@ -81,12 +107,6 @@ or use [the pre-built binaries](https://github.com/FiloSottile/mkcert/releases).
 curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-```
-
-For Arch Linux users, [`mkcert`](https://archlinux.org/packages/extra/x86_64/mkcert/) is available on the official Arch Linux repository.
-
-```
-sudo pacman -Syu mkcert
 ```
 
 ### Windows
