@@ -347,6 +347,11 @@ func (m *mkcert) newCA() {
 		MaxPathLenZero:        true,
 	}
 
+	if m.nameConstraints != "" {
+		tpl.PermittedDNSDomainsCritical = true
+		tpl.PermittedDNSDomains = []string{m.nameConstraints, "." + m.nameConstraints}
+	}
+
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, pub, priv)
 	fatalIfErr(err, "failed to generate CA certificate")
 
