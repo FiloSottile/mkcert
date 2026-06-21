@@ -57,6 +57,10 @@ const advancedUsage = `Advanced options:
 	-ecdsa
 	    Generate a certificate with an ECDSA key.
 
+	-mldsa
+	    Generate a certificate with an ML-DSA-65 key (post-quantum,
+	    FIPS 204). Requires Go 1.27+.
+
 	-pkcs12
 	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
 	    containing certificate and key for legacy applications.
@@ -95,6 +99,7 @@ func main() {
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
+		mldsaFlag     = flag.Bool("mldsa", false, "")
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
@@ -136,7 +141,10 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
-	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *clientFlag) {
+	if *ecdsaFlag && *mldsaFlag {
+		log.Fatalln("ERROR: can't set -ecdsa and -mldsa at the same time")
+	}
+	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *mldsaFlag || *clientFlag) {
 		log.Fatalln("ERROR: can only combine -csr with -install and -cert-file")
 	}
 	if *csrFlag != "" && flag.NArg() != 0 {
@@ -144,7 +152,7 @@ func main() {
 	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
-		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
+		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, mldsa: *mldsaFlag, client: *clientFlag,
 		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 	}).Run(flag.Args())
 }
@@ -154,7 +162,7 @@ const rootKeyName = "rootCA-key.pem"
 
 type mkcert struct {
 	installMode, uninstallMode bool
-	pkcs12, ecdsa, client      bool
+	pkcs12, ecdsa, mldsa, client bool
 	keyFile, certFile, p12File string
 	csrPath                    string
 
