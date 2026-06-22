@@ -51,6 +51,9 @@ func (m *mkcert) makeCert(hosts []string) {
 	if m.caKey == nil {
 		log.Fatalln("ERROR: can't create new certificates because the CA key (rootCA-key.pem) is missing")
 	}
+	if m.mldsa && m.pkcs12 {
+		log.Fatalln("ERROR: PKCS#12 does not support ML-DSA keys")
+	}
 
 	priv, err := m.generateKey(false)
 	fatalIfErr(err, "failed to generate certificate key")
@@ -71,6 +74,11 @@ func (m *mkcert) makeCert(hosts []string) {
 		NotBefore: time.Now(), NotAfter: expiration,
 
 		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+	}
+
+	// ML-DSA is a signature-only algorithm; key encipherment does not apply.
+	if m.mldsa {
+		tpl.KeyUsage = x509.KeyUsageDigitalSignature
 	}
 
 	for _, h := range hosts {
@@ -166,6 +174,12 @@ func (m *mkcert) printHosts(hosts []string) {
 func (m *mkcert) generateKey(rootCA bool) (crypto.PrivateKey, error) {
 	if m.ecdsa {
 		return ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	}
+	if m.mldsa {
+		if !mldsaSupported {
+			log.Fatalln("ERROR: ML-DSA support requires Go 1.27 or later")
+		}
+		return generateMLDSAKey()
 	}
 	if rootCA {
 		return rsa.GenerateKey(rand.Reader, 3072)
