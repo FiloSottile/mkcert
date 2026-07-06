@@ -18,11 +18,7 @@ var (
 	hasNSS       bool
 	hasCertutil  bool
 	certutilPath string
-	nssDBs       = []string{
-		filepath.Join(os.Getenv("HOME"), ".pki/nssdb"),
-		filepath.Join(os.Getenv("HOME"), "snap/chromium/current/.pki/nssdb"), // Snapcraft
-		"/etc/pki/nssdb", // CentOS 7
-	}
+	nssDBs       = defaultNSSDBs(os.Getenv("HOME"))
 	firefoxPaths = []string{
 		"/usr/bin/firefox",
 		"/usr/bin/firefox-nightly",
@@ -35,6 +31,15 @@ var (
 		"C:\\Program Files\\Mozilla Firefox",
 	}
 )
+
+func defaultNSSDBs(home string) []string {
+	return []string{
+		filepath.Join(home, ".pki/nssdb"),
+		filepath.Join(home, ".local/share/pki/nssdb"),
+		filepath.Join(home, "snap/chromium/current/.pki/nssdb"), // Snapcraft
+		"/etc/pki/nssdb", // CentOS 7
+	}
+}
 
 func init() {
 	allPaths := append(append([]string{}, nssDBs...), firefoxPaths...)
