@@ -6,7 +6,6 @@ mkcert is a simple tool for making locally-trusted development certificates. It 
 $ mkcert -install
 Created a new local CA 💥
 The local CA is now installed in the system trust store! ⚡️
-The local CA is now installed in the Firefox trust store (requires browser restart)! 🦊
 
 $ mkcert example.com "*.example.com" example.test localhost 127.0.0.1 ::1
 
@@ -37,7 +36,6 @@ On macOS, use [Homebrew](https://brew.sh/)
 
 ```
 brew install mkcert
-brew install nss # if you use Firefox
 ```
 
 or [MacPorts](https://www.macports.org/).
@@ -45,7 +43,6 @@ or [MacPorts](https://www.macports.org/).
 ```
 sudo port selfupdate
 sudo port install mkcert
-sudo port install nss # if you use Firefox
 ```
 
 ### Linux
@@ -122,7 +119,9 @@ mkcert supports the following root stores:
 * Chrome and Chromium
 * Java (when `JAVA_HOME` is set)
 
-To only install the local root CA into a subset of them, you can set the `TRUST_STORES` environment variable to a comma-separated list. Options are: "system", "java" and "nss" (includes Firefox).
+To only install the local root CA into a subset of them, you can set the `TRUST_STORES` environment variable to a comma-separated list. Options are: "system", "java", and "nss" (includes Firefox).
+
+Note that Firefox version 120 and later trusts certificates added to the system root store by default on macOS and Windows, so installing to the "nss" root store should be unnecessary on these platforms.
 
 ## Advanced topics
 
