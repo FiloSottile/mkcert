@@ -75,7 +75,8 @@ const advancedUsage = `Advanced options:
 	$TRUST_STORES (environment variable)
 	    A comma-separated list of trust stores to install the local
 	    root CA into. Options are: "system", "java" and "nss" (includes
-	    Firefox). Autodetected by default.
+	    Firefox). If blank, "system" and "java" are enabled by default.
+	    "nss" is disabled by default.
 
 `
 
@@ -345,7 +346,7 @@ func (m *mkcert) checkPlatform() bool {
 func storeEnabled(name string) bool {
 	stores := os.Getenv("TRUST_STORES")
 	if stores == "" {
-		return true
+		return name != "nss"
 	}
 	for _, store := range strings.Split(stores, ",") {
 		if store == name {
