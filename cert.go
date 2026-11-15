@@ -125,7 +125,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		domainCert, _ := x509.ParseCertificate(cert)
 		pfxData, err := pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, "changeit")
 		fatalIfErr(err, "failed to generate PKCS#12")
-		err = ioutil.WriteFile(p12File, pfxData, 0644)
+		err = ioutil.WriteFile(p12File, pfxData, 0600)
 		fatalIfErr(err, "failed to save PKCS#12")
 	}
 
